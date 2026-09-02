@@ -21,14 +21,19 @@
 			</p>
 		</div>
 
-		{#if data.sites.length > 0}
-			<a
-				href="/sites/new"
-				class="inline-flex items-center rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
-			>
-				Add Website
+		<div class="flex items-center gap-3">
+			<a href="/settings#add-user" class="text-sm text-neutral-500 hover:text-neutral-700">
+				Create account
 			</a>
-		{/if}
+			{#if data.sites.length > 0}
+				<a
+					href="/sites/new"
+					class="inline-flex items-center rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
+				>
+					Add Website
+				</a>
+			{/if}
+		</div>
 	</div>
 
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">

@@ -147,7 +147,7 @@
 			<p class="mt-3 text-sm text-red-600">{form.error}</p>
 		{/if}
 
-		<div class="mt-6 border-t border-neutral-200 pt-6">
+		<div id="add-user" class="mt-6 border-t border-neutral-200 pt-6 scroll-mt-6">
 			<h3 class="text-sm font-medium text-neutral-900">Add a user</h3>
 
 			<form method="POST" action="?/addUser" class="mt-3 flex flex-col gap-4">
