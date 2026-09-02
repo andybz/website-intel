@@ -1,0 +1,8 @@
+{
+	"files.associations": {
+		"*.css": "tailwindcss"
+	},
+	"chat.tools.terminal.autoApprove": {
+		"git checkout": true
+	}
+}
