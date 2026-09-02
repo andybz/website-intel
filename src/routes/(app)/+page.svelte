@@ -53,7 +53,9 @@
 				<li class="flex items-center justify-between gap-4 rounded-xl border border-neutral-200 bg-white px-5 py-4">
 					<div>
 						<div class="flex items-center gap-2">
-							<p class="font-medium text-neutral-900">{site.name}</p>
+							<a href="/sites/{site.id}" class="font-medium text-neutral-900 hover:underline">
+								{site.name}
+							</a>
 							<StatusBadge status={site.status} />
 						</div>
 						<p class="text-sm text-neutral-500">{site.url}</p>

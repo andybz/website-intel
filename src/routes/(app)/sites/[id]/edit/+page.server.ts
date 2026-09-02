@@ -14,13 +14,8 @@ function normalizeUrl(input: string): URL | null {
 	}
 }
 
-export const load: PageServerLoad = async ({ params }) => {
-	const siteId = Number(params.id);
-	if (!Number.isInteger(siteId)) error(404, 'Website not found');
-
-	const [site] = await db.select().from(sites).where(eq(sites.id, siteId));
-	if (!site) error(404, 'Website not found');
-
+export const load: PageServerLoad = async ({ parent }) => {
+	const { site } = await parent();
 	return { site };
 };
 

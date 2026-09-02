@@ -9,10 +9,8 @@
 </svelte:head>
 
 <div class="mx-auto max-w-lg">
-	<a href="/" class="text-sm text-neutral-500 hover:text-neutral-700">&larr; Back to dashboard</a>
-
-	<div class="mt-4 rounded-xl border border-neutral-200 bg-white p-6">
-		<h1 class="text-lg font-semibold text-neutral-900">Edit Website</h1>
+	<div class="rounded-xl border border-neutral-200 bg-white p-6">
+		<h2 class="text-lg font-semibold text-neutral-900">Edit Website</h2>
 
 		<form method="POST" class="mt-6 flex flex-col gap-4">
 			<div class="flex flex-col gap-1">
