@@ -11,6 +11,7 @@
 			<a href="/" class="text-sm font-semibold text-neutral-900">Website Monitor</a>
 
 			<div class="flex items-center gap-3">
+				<a href="/settings" class="text-sm text-neutral-500 hover:text-neutral-700">Settings</a>
 				<span class="hidden text-sm text-neutral-500 sm:inline">{data.user?.email}</span>
 				<form method="POST" action="/logout">
 					<button
