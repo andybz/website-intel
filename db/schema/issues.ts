@@ -27,6 +27,10 @@ export const issues = pgTable(
 		// Set when a notification email was last sent for this issue; reset to
 		// null when a resolved issue reoccurs, so it can notify again.
 		notifiedAt: timestamp('notified_at', { withTimezone: true }),
+		// Cached AI explanation (README section 23) - generated on demand, not
+		// automatically, to avoid unnecessary API cost. See src/lib/server/ai.ts.
+		aiSummary: jsonb('ai_summary'),
+		aiSummaryGeneratedAt: timestamp('ai_summary_generated_at', { withTimezone: true }),
 		metadata: jsonb('metadata'),
 		firstSeen: timestamp('first_seen', { withTimezone: true }).notNull().defaultNow(),
 		lastSeen: timestamp('last_seen', { withTimezone: true }).notNull().defaultNow(),
