@@ -44,31 +44,6 @@
 		<StatCard label="Disconnected" value={data.summary.disconnected} tone="red" />
 	</div>
 
-	{#if data.latestIssues.length > 0}
-		<div>
-			<h2 class="text-base font-medium text-neutral-900">Latest Issues</h2>
-			<ul class="mt-3 flex flex-col gap-3">
-				{#each data.latestIssues as issue (issue.id)}
-					<li class="rounded-xl border border-neutral-200 bg-white px-5 py-4">
-						<a href="/sites/{issue.siteId}/issues/{issue.id}" class="flex flex-col gap-2">
-							<div class="flex flex-wrap items-center gap-2">
-								<SeverityBadge severity={issue.currentSeverity} />
-								<span class="text-xs font-medium text-neutral-500">{issue.siteName}</span>
-							</div>
-							<p class="font-medium break-words text-neutral-900">{issue.message}</p>
-							<p class="text-sm text-neutral-500">
-								{issue.occurrenceCount}
-								{issue.occurrenceCount === 1 ? 'occurrence' : 'occurrences'} · Last seen {formatRelativeTime(
-									issue.lastSeen
-								)}
-							</p>
-						</a>
-					</li>
-				{/each}
-			</ul>
-		</div>
-	{/if}
-
 	{#if data.sites.length === 0}
 		<div class="rounded-xl border border-dashed border-neutral-300 bg-white px-6 py-12 text-center">
 			<h2 class="text-base font-medium text-neutral-900">No websites connected yet</h2>
@@ -97,6 +72,15 @@
 						<p class="text-sm text-neutral-500">{site.url}</p>
 						{#if site.status === 'connected'}
 							<p class="text-xs text-neutral-400">Last seen {formatRelativeTime(site.lastHeartbeatAt)}</p>
+						{/if}
+						{#if site.latestIssue}
+							<a
+								href="/sites/{site.id}/issues/{site.latestIssue.id}"
+								class="mt-2 flex items-center gap-2 hover:underline"
+							>
+								<SeverityBadge severity={site.latestIssue.currentSeverity} />
+								<span class="break-words text-sm text-neutral-700">{site.latestIssue.message}</span>
+							</a>
 						{/if}
 					</div>
 

@@ -43,7 +43,7 @@
 - Issue occurrence hourly charts (section 50): lightweight hourly rollup table (`issue_hourly_counts`) populated on every event ingestion, rendered as a dependency-free CSS bar chart on the issue detail page (last 48 hours, gap-filled with zero-count hours)
 - Issue trend detection (section 29 "Increasing/Decreasing" lifecycle): deterministic comparison of the last 6 hours of occurrence buckets vs. the prior 6 hours (`src/lib/server/trend.ts`), shown as an ▲ Increasing / ▼ Decreasing / ● New badge next to severity on the issue detail page
 - Website Health score (sections 13/15/20): deterministic 0-100 score + Healthy/Needs Attention/Critical status derived from currently-open issue severities (`src/lib/server/health.ts`), shown on both the dashboard site list and the site Overview page — a simplified stand-in for the full Website Impact Score
-- "Latest Issues" dashboard card: cross-site, at-a-glance view of the top 5 open issues (sorted by severity, then recency) across ALL connected sites, right on the homepage
+- "Latest Issues" per-site: each site's row on the dashboard now shows that site's single most-worth-knowing open issue inline (severity + message, linking straight to it) alongside its Connected/Health badges — no separate cross-site section
 - Manual "Mark as Resolved" on the issue detail page — lets a user close an issue immediately instead of waiting for the 30-min auto-resolve window; a new occurrence still flips it back to open automatically
 - Not yet built: full refined Website Impact Score (needs traffic/visitor-impact signals, see backlog below), event timelines beyond the unified Activity view, change correlation
 
