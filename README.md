@@ -36,7 +36,12 @@
 
 **Phase 2 — Intelligence: 🚧 In progress**
 - Issue auto-resolution (derived: an issue is shown as "Resolved" once ~30 minutes pass with no new occurrences, per section 29 — no new occurrence flips it back to "open" automatically)
-- Not yet built: AI issue summaries/probable causes, refined Website Impact Score, email notifications, issue activity charts, event timelines, change correlation
+- Email notifications for critical issues (severity ≥6), with alert-fatigue prevention (notifies once per "wave", resets on resolved→reoccur transition), sent via Resend
+- Account management: Settings page (add user, change own password, reset another user's password, remove user), forgot-password/reset-password flow via email
+- "What Happened" unified timeline on the Activity tab (merges Issues + Activity chronologically)
+- AI issue summaries (OpenAI `gpt-4o-mini`): on-demand, cached "what happened / who's affected / likely cause / recommended action" explanation per issue, sends only sanitized fields (never raw metadata)
+- Issue occurrence hourly charts (section 50): lightweight hourly rollup table (`issue_hourly_counts`) populated on every event ingestion, rendered as a dependency-free CSS bar chart on the issue detail page (last 48 hours, gap-filled with zero-count hours)
+- Not yet built: refined Website Impact Score, event timelines beyond the unified Activity view, change correlation
 
 **Not started:** Phase 3 (anomaly detection, Ask Your Website), Phase 4 (server-level monitoring), Phase 5 (SaaS/agency features).
 
