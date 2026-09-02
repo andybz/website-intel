@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import SeverityBadge from '$lib/components/SeverityBadge.svelte';
+	import OccurrenceChart from '$lib/components/OccurrenceChart.svelte';
 	import { formatRelativeTime } from '$lib/utils/time';
 	import type { IssueAiSummary } from '$lib/server/ai';
 
@@ -41,6 +42,13 @@
 				No new occurrences have been detected recently.
 			</p>
 		{/if}
+	</div>
+
+	<div class="rounded-xl border border-neutral-200 bg-white p-6">
+		<h2 class="text-base font-medium text-neutral-900">Occurrences (last 48 hours)</h2>
+		<div class="mt-4">
+			<OccurrenceChart buckets={data.chartBuckets} />
+		</div>
 	</div>
 
 	<div class="rounded-xl border border-neutral-200 bg-white p-6">

@@ -1,11 +1,13 @@
 import { error, fail } from '@sveltejs/kit';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, gte } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { issues, sites } from '$db/schema';
+import { issues, sites, issueHourlyCounts } from '$db/schema';
 import { computeCurrentSeverity } from '$lib/server/severity';
 import { computeIssueStatus } from '$lib/utils/time';
 import { generateIssueSummary } from '$lib/server/ai';
+
+const CHART_HOURS = 48;
 
 export const load: PageServerLoad = async ({ parent, params }) => {
 	const { site } = await parent();
@@ -20,13 +22,32 @@ export const load: PageServerLoad = async ({ parent, params }) => {
 
 	if (!issue) error(404, 'Issue not found');
 
+	const since = new Date(Date.now() - CHART_HOURS * 60 * 60 * 1000);
+	const rows = await db
+		.select()
+		.from(issueHourlyCounts)
+		.where(and(eq(issueHourlyCounts.issueId, issueId), gte(issueHourlyCounts.hourStart, since)));
+
+	const countByHour = new Map(rows.map((r) => [r.hourStart.getTime(), r.count]));
+	const chartBuckets = [];
+	const now = new Date();
+	now.setMinutes(0, 0, 0);
+	for (let i = CHART_HOURS - 1; i >= 0; i--) {
+		const hour = new Date(now.getTime() - i * 60 * 60 * 1000);
+		chartBuckets.push({
+			label: hour.toLocaleTimeString([], { hour: 'numeric' }),
+			count: countByHour.get(hour.getTime()) ?? 0
+		});
+	}
+
 	return {
 		site,
 		issue: {
 			...issue,
 			currentSeverity: computeCurrentSeverity(issue.severity, issue.occurrenceCount),
 			displayStatus: computeIssueStatus(issue.status, issue.lastSeen)
-		}
+		},
+		chartBuckets
 	};
 };
 

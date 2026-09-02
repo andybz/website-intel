@@ -50,6 +50,13 @@
       "when": 1788381501654,
       "tag": "0006_real_marvel_apes",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788382611666,
+      "tag": "0007_cuddly_legion",
+      "breakpoints": true
     }
   ]
 }

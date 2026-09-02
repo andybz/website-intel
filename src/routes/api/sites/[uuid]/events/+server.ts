@@ -3,7 +3,7 @@ import { json, error } from '@sveltejs/kit';
 import { eq, and, sql } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { sites, issues, activity } from '$db/schema';
+import { sites, issues, activity, issueHourlyCounts } from '$db/schema';
 import { verifyApiSecret } from '$lib/server/site-auth';
 import { computeFingerprint, normalizeMessage } from '$lib/server/fingerprint';
 import { getBaseSeverity, computeCurrentSeverity, NOTIFICATION_SEVERITY_THRESHOLD } from '$lib/server/severity';
@@ -146,6 +146,17 @@ export const POST: RequestHandler = async ({ request, params }) => {
 			})
 			.returning();
 	}
+
+	// Hourly rollup for occurrence-over-time charts (README section 50).
+	const hourStart = new Date(now);
+	hourStart.setMinutes(0, 0, 0);
+	await db
+		.insert(issueHourlyCounts)
+		.values({ issueId: issue.id, hourStart, count: 1 })
+		.onConflictDoUpdate({
+			target: [issueHourlyCounts.issueId, issueHourlyCounts.hourStart],
+			set: { count: sql`${issueHourlyCounts.count} + 1` }
+		});
 
 	const currentSeverity = computeCurrentSeverity(issue.severity, issue.occurrenceCount);
 
