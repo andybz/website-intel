@@ -17,6 +17,8 @@ services:
     environment:
       DATABASE_URL: postgres://website_intel:${POSTGRES_PASSWORD}@db:5432/website_intel
       SESSION_SECRET: ${SESSION_SECRET}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
       ORIGIN: https://monitor.andybz.com
       PORT: 3000
       HOST: 0.0.0.0

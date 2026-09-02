@@ -5,3 +5,4 @@ export * from './site-plugins';
 export * from './pairing-tokens';
 export * from './issues';
 export * from './activity';
+export * from './password-reset-tokens';

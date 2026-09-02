@@ -49,6 +49,10 @@
 			>
 				Sign in
 			</button>
+
+			<a href="/forgot-password" class="text-center text-sm text-neutral-500 hover:text-neutral-700">
+				Forgot password?
+			</a>
 		</form>
 	</div>
 </div>

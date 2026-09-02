@@ -6,7 +6,7 @@ import {
 	deleteSessionTokenCookie
 } from '$lib/server/auth';
 
-const PUBLIC_PATHS = new Set(['/login']);
+const PUBLIC_PATHS = new Set(['/login', '/forgot-password']);
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const token = getSessionToken(event);
@@ -27,7 +27,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.session = session;
 	}
 
-	const isPublicPath = PUBLIC_PATHS.has(event.url.pathname);
+	const isPublicPath = PUBLIC_PATHS.has(event.url.pathname) || event.url.pathname.startsWith('/reset-password/');
 	// /api/* routes authenticate WordPress connectors via their own bearer
 	// credential (see src/lib/server/site-auth.ts), not the user session cookie.
 	const isApiPath = event.url.pathname.startsWith('/api/');
