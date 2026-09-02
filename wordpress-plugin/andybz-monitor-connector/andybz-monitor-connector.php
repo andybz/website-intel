@@ -22,10 +22,12 @@ define( 'ANDYBZ_MONITOR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-connector.php';
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-heartbeat.php';
+require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-error-reporter.php';
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-admin.php';
 
 add_action( 'plugins_loaded', array( 'AndyBZ_Monitor_Connector', 'instance' ) );
 add_action( 'plugins_loaded', array( 'AndyBZ_Monitor_Heartbeat', 'instance' ) );
+add_action( 'plugins_loaded', array( 'AndyBZ_Monitor_Error_Reporter', 'instance' ) );
 add_action( 'plugins_loaded', array( 'AndyBZ_Monitor_Admin', 'instance' ) );
 
 register_activation_hook( __FILE__, array( 'AndyBZ_Monitor_Heartbeat', 'activate' ) );

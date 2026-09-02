@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { formatRelativeTime, isHeartbeatStale } from '$lib/utils/time';
+	import SeverityBadge from '$lib/components/SeverityBadge.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -63,11 +64,38 @@
 		</div>
 	</div>
 
-	<div class="rounded-xl border border-dashed border-neutral-300 bg-white px-6 py-10 text-center">
-		<h2 class="text-base font-medium text-neutral-900">No issues to show yet</h2>
-		<p class="mt-1 text-sm text-neutral-500">
-			Error and event monitoring hasn't been built yet — this is where detected issues will
-			appear.
-		</p>
+	<div class="flex items-center justify-between">
+		<h2 class="text-base font-medium text-neutral-900">Things worth knowing</h2>
+		{#if data.issueCount > 0}
+			<a href="/sites/{data.site.id}/issues" class="text-sm text-neutral-500 hover:text-neutral-700">
+				View all issues &rarr;
+			</a>
+		{/if}
 	</div>
+
+	{#if data.topIssues.length === 0}
+		<div class="rounded-xl border border-dashed border-neutral-300 bg-white px-6 py-10 text-center">
+			<h2 class="text-base font-medium text-neutral-900">No issues to show yet</h2>
+			<p class="mt-1 text-sm text-neutral-500">
+				Your website is operating normally. No errors have been reported.
+			</p>
+		</div>
+	{:else}
+		<ul class="flex flex-col gap-3">
+			{#each data.topIssues as issue (issue.id)}
+				<li class="rounded-xl border border-neutral-200 bg-white px-5 py-4">
+					<a href="/sites/{data.site.id}/issues/{issue.id}" class="flex flex-col gap-2">
+						<SeverityBadge severity={issue.currentSeverity} />
+						<p class="font-medium text-neutral-900">{issue.message}</p>
+						<p class="text-sm text-neutral-500">
+							{issue.occurrenceCount}
+							{issue.occurrenceCount === 1 ? 'occurrence' : 'occurrences'} today · Last seen {formatRelativeTime(
+								issue.lastSeen
+							)}
+						</p>
+					</a>
+				</li>
+			{/each}
+		</ul>
+	{/if}
 </div>

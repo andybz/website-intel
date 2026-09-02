@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { json, error } from '@sveltejs/kit';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { sites, issues } from '$db/schema';

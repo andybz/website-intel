@@ -15,6 +15,13 @@
       "when": 1788370815532,
       "tag": "0001_lucky_colonel_america",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788375104389,
+      "tag": "0002_wakeful_master_mold",
+      "breakpoints": true
     }
   ]
 }

@@ -11,13 +11,14 @@ export const load: PageServerLoad = async ({ parent }) => {
 		.select()
 		.from(issues)
 		.where(eq(issues.siteId, site.id))
-		.orderBy(desc(issues.lastSeen))
-		.limit(20);
+		.orderBy(desc(issues.lastSeen));
 
-	const topIssues = rows
-		.map((issue) => ({ ...issue, currentSeverity: computeCurrentSeverity(issue.severity, issue.occurrenceCount) }))
-		.sort((a, b) => b.currentSeverity - a.currentSeverity)
-		.slice(0, 3);
+	const list = rows
+		.map((issue) => ({
+			...issue,
+			currentSeverity: computeCurrentSeverity(issue.severity, issue.occurrenceCount)
+		}))
+		.sort((a, b) => b.currentSeverity - a.currentSeverity);
 
-	return { site, topIssues, issueCount: rows.length };
+	return { site, issues: list };
 };
