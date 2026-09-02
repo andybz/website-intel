@@ -23,5 +23,10 @@ export default defineConfig({
 				'$db/*': 'db/*'
 			}
 		})
-	]
+	],
+	server: {
+		// Allow access via a Cloudflare quick tunnel for testing the WordPress
+		// plugin against a real, publicly reachable site (local dev only).
+		allowedHosts: ['.trycloudflare.com']
+	}
 });

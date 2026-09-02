@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import StatCard from '$lib/components/StatCard.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	import { formatRelativeTime } from '$lib/utils/time';
 
 	let { data }: { data: PageData } = $props();
 </script>
@@ -59,6 +60,9 @@
 							<StatusBadge status={site.status} />
 						</div>
 						<p class="text-sm text-neutral-500">{site.url}</p>
+						{#if site.status === 'connected'}
+							<p class="text-xs text-neutral-400">Last seen {formatRelativeTime(site.lastHeartbeatAt)}</p>
+						{/if}
 					</div>
 
 					<div class="flex items-center gap-2">

@@ -28,8 +28,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	const isPublicPath = PUBLIC_PATHS.has(event.url.pathname);
+	// /api/* routes authenticate WordPress connectors via their own bearer
+	// credential (see src/lib/server/site-auth.ts), not the user session cookie.
+	const isApiPath = event.url.pathname.startsWith('/api/');
 
-	if (!event.locals.user && !isPublicPath) {
+	if (!event.locals.user && !isPublicPath && !isApiPath) {
 		redirect(303, '/login');
 	}
 

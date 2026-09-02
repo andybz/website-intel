@@ -1,7 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { formatRelativeTime, isHeartbeatStale } from '$lib/utils/time';
 
 	let { data }: { data: PageData } = $props();
+
+	let stale = $derived(
+		data.site.status === 'connected' && isHeartbeatStale(data.site.lastHeartbeatAt)
+	);
 </script>
 
 <svelte:head>
@@ -23,13 +28,21 @@
 				View setup instructions
 			</a>
 		</div>
+	{:else if stale}
+		<div class="rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+			<p class="text-sm font-medium text-red-800">Connection lost</p>
+			<p class="mt-1 text-sm text-red-700">
+				No heartbeat received recently. The website may be offline, or its cron/heartbeat process
+				may have stopped.
+			</p>
+		</div>
 	{/if}
 
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 		<div class="rounded-xl border border-neutral-200 bg-white px-5 py-4">
 			<p class="text-sm text-neutral-500">Last seen</p>
 			<p class="mt-1 text-base font-medium text-neutral-900">
-				{data.site.lastHeartbeatAt ? new Date(data.site.lastHeartbeatAt).toLocaleString() : 'Never'}
+				{formatRelativeTime(data.site.lastHeartbeatAt)}
 			</p>
 		</div>
 		<div class="rounded-xl border border-neutral-200 bg-white px-5 py-4">
