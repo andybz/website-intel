@@ -28,3 +28,7 @@ export function computeCurrentSeverity(baseSeverity: number, occurrenceCount: nu
 	const bump = Math.floor(Math.log10(Math.max(occurrenceCount, 1) + 1));
 	return Math.min(10, baseSeverity + bump);
 }
+
+// Only meaningfully severe issues trigger a notification email - per README
+// section 29, avoid alert fatigue. Deliberately conservative for MVP.
+export const NOTIFICATION_SEVERITY_THRESHOLD = 6;

@@ -1,13 +1,15 @@
 import { z } from 'zod';
 import { json, error } from '@sveltejs/kit';
-import { eq, sql } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { sites, issues, activity } from '$db/schema';
 import { verifyApiSecret } from '$lib/server/site-auth';
 import { computeFingerprint, normalizeMessage } from '$lib/server/fingerprint';
-import { getBaseSeverity } from '$lib/server/severity';
+import { getBaseSeverity, computeCurrentSeverity, NOTIFICATION_SEVERITY_THRESHOLD } from '$lib/server/severity';
 import { sanitizeMetadata, sanitizeRequestUrl } from '$lib/server/sanitize';
+import { computeIssueStatus } from '$lib/utils/time';
+import { notifyIssue } from '$lib/server/notify';
 
 const eventSchema = z.object({
 	eventType: z.string().trim().min(1).max(50),
@@ -97,38 +99,64 @@ export const POST: RequestHandler = async ({ request, params }) => {
 		line: data.line
 	});
 
-	const [issue] = await db
-		.insert(issues)
-		.values({
-			siteId: site.id,
-			fingerprint,
-			eventType: data.eventType,
-			category,
-			severity: getBaseSeverity(data.eventType),
-			message,
-			file: data.file ?? null,
-			line: data.line ?? null,
-			stackTrace: data.stackTrace ?? null,
-			requestUrl: data.requestUrl ? sanitizeRequestUrl(data.requestUrl) : null,
-			metadata: data.metadata ? sanitizeMetadata(data.metadata) : null,
-			occurrenceCount: 1,
-			firstSeen: now,
-			lastSeen: now,
-			updatedAt: now
-		})
-		.onConflictDoUpdate({
-			target: [issues.siteId, issues.fingerprint],
-			set: {
+	const [existing] = await db
+		.select()
+		.from(issues)
+		.where(and(eq(issues.siteId, site.id), eq(issues.fingerprint, fingerprint)));
+
+	// A resolved issue reoccurring is treated as a fresh detection, so it can
+	// trigger a notification again rather than staying silenced forever.
+	const wasResolved = existing ? computeIssueStatus(existing.status, existing.lastSeen) === 'resolved' : false;
+
+	let issue;
+	if (existing) {
+		[issue] = await db
+			.update(issues)
+			.set({
 				occurrenceCount: sql`${issues.occurrenceCount} + 1`,
 				lastSeen: now,
 				updatedAt: now,
 				status: 'open',
+				notifiedAt: wasResolved ? null : sql`${issues.notifiedAt}`,
 				// Keep the most recent technical details for debugging context.
 				stackTrace: data.stackTrace ?? sql`${issues.stackTrace}`,
 				requestUrl: data.requestUrl ? sanitizeRequestUrl(data.requestUrl) : sql`${issues.requestUrl}`
-			}
-		})
-		.returning();
+			})
+			.where(eq(issues.id, existing.id))
+			.returning();
+	} else {
+		[issue] = await db
+			.insert(issues)
+			.values({
+				siteId: site.id,
+				fingerprint,
+				eventType: data.eventType,
+				category,
+				severity: getBaseSeverity(data.eventType),
+				message,
+				file: data.file ?? null,
+				line: data.line ?? null,
+				stackTrace: data.stackTrace ?? null,
+				requestUrl: data.requestUrl ? sanitizeRequestUrl(data.requestUrl) : null,
+				metadata: data.metadata ? sanitizeMetadata(data.metadata) : null,
+				occurrenceCount: 1,
+				firstSeen: now,
+				lastSeen: now,
+				updatedAt: now
+			})
+			.returning();
+	}
+
+	const currentSeverity = computeCurrentSeverity(issue.severity, issue.occurrenceCount);
+
+	if (currentSeverity >= NOTIFICATION_SEVERITY_THRESHOLD && !issue.notifiedAt) {
+		try {
+			await notifyIssue(issue, site, currentSeverity);
+			await db.update(issues).set({ notifiedAt: new Date() }).where(eq(issues.id, issue.id));
+		} catch (err) {
+			console.error('Failed to send issue notification email:', err);
+		}
+	}
 
 	return json({ ok: true, issueId: issue.id, occurrenceCount: issue.occurrenceCount });
 };

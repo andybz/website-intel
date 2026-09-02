@@ -36,6 +36,13 @@
       "when": 1788379683110,
       "tag": "0004_deep_lizard",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788380267065,
+      "tag": "0005_romantic_bloodstrike",
+      "breakpoints": true
     }
   ]
 }

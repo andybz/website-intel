@@ -1,7 +1,12 @@
 import { env } from '$env/dynamic/private';
 
 // Thin wrapper around Resend's HTTP API - no SDK dependency needed for one call.
-export async function sendEmail(options: { to: string; subject: string; html: string; text: string }) {
+export async function sendEmail(options: {
+	to: string | string[];
+	subject: string;
+	html: string;
+	text: string;
+}) {
 	if (!env.RESEND_API_KEY || !env.RESEND_FROM_EMAIL) {
 		throw new Error('RESEND_API_KEY / RESEND_FROM_EMAIL are not configured.');
 	}

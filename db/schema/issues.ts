@@ -24,6 +24,9 @@ export const issues = pgTable(
 		requestUrl: text('request_url'),
 		occurrenceCount: integer('occurrence_count').notNull().default(1),
 		status: text('status').notNull().default('open'), // open|resolved
+		// Set when a notification email was last sent for this issue; reset to
+		// null when a resolved issue reoccurs, so it can notify again.
+		notifiedAt: timestamp('notified_at', { withTimezone: true }),
 		metadata: jsonb('metadata'),
 		firstSeen: timestamp('first_seen', { withTimezone: true }).notNull().defaultNow(),
 		lastSeen: timestamp('last_seen', { withTimezone: true }).notNull().defaultNow(),
