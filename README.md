@@ -40,7 +40,10 @@
 
 **Not started:** Phase 3 (anomaly detection, Ask Your Website), Phase 4 (server-level monitoring), Phase 5 (SaaS/agency features).
 
-**Deployment:** currently local-dev only (Docker Postgres + `npm run dev`, tested via Cloudflare quick tunnel). Production deployment to a live server is in progress.
+**Deployment: ✅ Live** — self-hosted on the `abzdev` server (Ubuntu + Docker) at `https://monitor.andybz.com`, behind nginx + Let's Encrypt.
+- `Dockerfile` (Node 24, `adapter-node`) + `docker-compose.prod.yml` (app + Postgres containers)
+- Deploy flow: `git push abzdev main` → a post-receive hook on the server checks out the code, runs `docker compose up -d --build` (which also runs DB migrations on container start via `docker-entrypoint.sh`)
+- Local dev is unaffected — still Docker Postgres + `npm run dev`, tested via a Cloudflare quick tunnel for real-WordPress-site testing
 
 ---
 
