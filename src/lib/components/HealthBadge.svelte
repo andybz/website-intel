@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { HealthStatus } from '$lib/server/health';
+	import type { HealthGrade, HealthStatus } from '$lib/server/health';
 
-	let { status, score }: { status: HealthStatus; score: number } = $props();
+	let { status, score, grade }: { status: HealthStatus; score: number; grade: HealthGrade } = $props();
 
 	const styles: Record<HealthStatus, string> = {
 		healthy: 'bg-emerald-50 text-emerald-700',
@@ -26,5 +26,5 @@
 	class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium {styles[status]}"
 >
 	{dots[status]}
-	{labels[status]} · {score}
+	{labels[status]} · {score} ({grade})
 </span>

@@ -66,7 +66,7 @@
 							</a>
 							<StatusBadge status={site.status} />
 							{#if site.health}
-								<HealthBadge status={site.health.status} score={site.health.score} />
+								<HealthBadge status={site.health.status} score={site.health.score} grade={site.health.grade} />
 							{/if}
 						</div>
 						<p class="text-sm text-neutral-500">{site.url}</p>

@@ -54,7 +54,10 @@
 	{#if data.site.status !== 'pending'}
 		<div class="rounded-xl border border-neutral-200 bg-white px-6 py-5">
 			<p class="text-sm text-neutral-500">Website Health</p>
-			<p class="mt-1 text-4xl font-semibold text-neutral-900">{data.health.score}</p>
+			<p class="mt-1 flex items-baseline gap-2">
+				<span class="text-4xl font-semibold text-neutral-900">{data.health.score}</span>
+				<span class="text-lg font-medium text-neutral-400">{data.health.grade}</span>
+			</p>
 			<p class="mt-1 text-sm font-medium {healthColor[data.health.status]}">
 				{healthCopy[data.health.status]}
 			</p>

@@ -5,21 +5,36 @@
  * Derived purely from currently-open issue severities, no AI involved.
  */
 export type HealthStatus = 'healthy' | 'needs_attention' | 'critical';
+export type HealthGrade = 'A' | 'B' | 'C' | 'D' | 'F';
+
+function gradeForScore(score: number): HealthGrade {
+	if (score >= 90) return 'A';
+	if (score >= 80) return 'B';
+	if (score >= 70) return 'C';
+	if (score >= 60) return 'D';
+	return 'F';
+}
 
 export function computeSiteHealth(openIssueSeverities: number[]): {
 	score: number;
 	status: HealthStatus;
+	grade: HealthGrade;
 } {
 	if (openIssueSeverities.length === 0) {
-		return { score: 100, status: 'healthy' };
+		return { score: 100, status: 'healthy', grade: 'A' };
 	}
 
 	const worst = Math.max(...openIssueSeverities);
-	const status: HealthStatus = worst >= 8 ? 'critical' : worst >= 5 ? 'needs_attention' : 'healthy';
-
-	const severityPenalty = worst * 9;
-	const volumePenalty = Math.min(10, (openIssueSeverities.length - 1) * 1.5);
+	// Quadratic severity penalty - a single severe issue should hurt far more
+	// than several minor ones - plus a mild, capped penalty for having many
+	// issues open at once (volume alone shouldn't be as damaging as one bad issue).
+	const severityPenalty = worst * worst * 0.6;
+	const volumePenalty = Math.min(8, (openIssueSeverities.length - 1) * 1);
 	const score = Math.max(0, Math.round(100 - severityPenalty - volumePenalty));
 
-	return { score, status };
+	// Standard A-F grading bands: 90+ Healthy (A), 80-89 still Healthy but
+	// only "somewhat" (B), 70-79 Needs Attention (C), below that is Critical.
+	const status: HealthStatus = score >= 80 ? 'healthy' : score >= 70 ? 'needs_attention' : 'critical';
+
+	return { score, status, grade: gradeForScore(score) };
 }
