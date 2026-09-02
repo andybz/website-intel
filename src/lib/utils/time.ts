@@ -24,9 +24,12 @@ export function formatRelativeTime(date: Date | string | null | undefined): stri
 	return formatter.format(0, 'second');
 }
 
-// Heartbeats are expected roughly every 5 minutes; allow two missed beats
-// before treating a "connected" site as stale in the UI.
-const STALE_THRESHOLD_MS = 1000 * 60 * 10;
+// Heartbeats are expected roughly every 5 minutes, but WordPress's built-in
+// pseudo-cron only fires on incoming page requests (it is NOT a true
+// background scheduler) - on lower-traffic real sites this can lag well past
+// the nominal interval even though the site is perfectly healthy. Use a
+// generous threshold to avoid false "Connection lost" positives.
+const STALE_THRESHOLD_MS = 1000 * 60 * 20;
 
 export function isHeartbeatStale(lastHeartbeatAt: Date | string | null | undefined): boolean {
 	if (!lastHeartbeatAt) return true;

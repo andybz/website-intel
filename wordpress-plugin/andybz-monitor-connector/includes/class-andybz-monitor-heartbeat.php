@@ -13,6 +13,11 @@ class AndyBZ_Monitor_Heartbeat {
 
 	const CRON_HOOK = 'andybz_monitor_heartbeat_event';
 	const CRON_INTERVAL = 'andybz_monitor_five_minutes';
+	// WP-Cron only runs when a request happens to arrive after it's due (and
+	// not at all if DISABLE_WP_CRON is set with no replacement system cron),
+	// so throttle a lightweight opportunistic heartbeat onto real requests too.
+	const OPPORTUNISTIC_THROTTLE_TRANSIENT = 'andybz_monitor_last_opportunistic_heartbeat';
+	const OPPORTUNISTIC_THROTTLE_SECONDS = 4 * MINUTE_IN_SECONDS;
 
 	/**
 	 * @var AndyBZ_Monitor_Heartbeat|null
@@ -32,6 +37,9 @@ class AndyBZ_Monitor_Heartbeat {
 		// Send an immediate heartbeat right after a successful connect so the
 		// dashboard shows real data without waiting for the next cron tick.
 		add_action( 'andybz_monitor_connected', array( $this, 'send_heartbeat' ) );
+		// Fires on every real request (front-end or admin) regardless of
+		// WP-Cron's state, so low-traffic or DISABLE_WP_CRON sites still stay fresh.
+		add_action( 'init', array( $this, 'maybe_send_opportunistic_heartbeat' ) );
 	}
 
 	public function register_cron_interval( $schedules ) {
@@ -109,6 +117,37 @@ class AndyBZ_Monitor_Heartbeat {
 	 * @return true|WP_Error
 	 */
 	public function send_heartbeat() {
+		return $this->send_heartbeat_request( true );
+	}
+
+	/**
+	 * Opportunistically nudge a heartbeat on real requests, throttled so it
+	 * can run at most once per interval and never blocks the page response.
+	 */
+	public function maybe_send_opportunistic_heartbeat() {
+		$connector = AndyBZ_Monitor_Connector::instance();
+
+		if ( ! $connector->is_connected() ) {
+			return;
+		}
+
+		if ( false !== get_transient( self::OPPORTUNISTIC_THROTTLE_TRANSIENT ) ) {
+			return;
+		}
+
+		// Set the throttle before sending so overlapping concurrent requests
+		// can't all slip through before the first one finishes.
+		set_transient( self::OPPORTUNISTIC_THROTTLE_TRANSIENT, time(), self::OPPORTUNISTIC_THROTTLE_SECONDS );
+		$this->send_heartbeat_request( false );
+	}
+
+	/**
+	 * @param bool $blocking Whether to wait for and validate the response.
+	 *                       False sends a fire-and-forget request so it never
+	 *                       adds latency to a real visitor's page load.
+	 * @return true|WP_Error
+	 */
+	private function send_heartbeat_request( $blocking ) {
 		$connector = AndyBZ_Monitor_Connector::instance();
 
 		if ( ! $connector->is_connected() ) {
@@ -121,14 +160,19 @@ class AndyBZ_Monitor_Heartbeat {
 		$response = wp_remote_post(
 			$url,
 			array(
-				'timeout' => 15,
-				'headers' => array(
+				'timeout'   => $blocking ? 15 : 0.01,
+				'blocking'  => $blocking,
+				'headers'   => array(
 					'Content-Type'  => 'application/json',
 					'Authorization' => 'Bearer ' . $settings['secret'],
 				),
-				'body'    => wp_json_encode( $this->collect_site_data() ),
+				'body'      => wp_json_encode( $this->collect_site_data() ),
 			)
 		);
+
+		if ( ! $blocking ) {
+			return true;
+		}
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
