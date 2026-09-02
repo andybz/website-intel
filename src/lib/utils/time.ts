@@ -33,3 +33,18 @@ export function isHeartbeatStale(lastHeartbeatAt: Date | string | null | undefin
 	const target = typeof lastHeartbeatAt === 'string' ? new Date(lastHeartbeatAt) : lastHeartbeatAt;
 	return Date.now() - target.getTime() > STALE_THRESHOLD_MS;
 }
+
+// An issue is considered resolved once this long has passed with no new
+// occurrences (README section 29). Derived at read time - no background job
+// needed, and any new occurrence flips it back to 'open' automatically
+// (see the ingestion endpoint's onConflictDoUpdate).
+const ISSUE_RESOLVED_AFTER_MS = 1000 * 60 * 30;
+
+export function computeIssueStatus(
+	status: string,
+	lastSeen: Date | string
+): 'open' | 'resolved' {
+	if (status === 'resolved') return 'resolved';
+	const target = typeof lastSeen === 'string' ? new Date(lastSeen) : lastSeen;
+	return Date.now() - target.getTime() > ISSUE_RESOLVED_AFTER_MS ? 'resolved' : 'open';
+}

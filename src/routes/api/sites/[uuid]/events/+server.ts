@@ -3,7 +3,7 @@ import { json, error } from '@sveltejs/kit';
 import { eq, sql } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { sites, issues } from '$db/schema';
+import { sites, issues, activity } from '$db/schema';
 import { verifyApiSecret } from '$lib/server/site-auth';
 import { computeFingerprint, normalizeMessage } from '$lib/server/fingerprint';
 import { getBaseSeverity } from '$lib/server/severity';
@@ -26,7 +26,19 @@ function getBearerToken(request: Request): string | null {
 	return match ? match[1] : null;
 }
 
+const CHANGE_EVENT_TYPES = new Set([
+	'plugin_updated',
+	'plugin_activated',
+	'plugin_deactivated',
+	'plugin_installed',
+	'plugin_deleted',
+	'theme_updated',
+	'theme_activated',
+	'wordpress_updated'
+]);
+
 function defaultCategory(eventType: string): string {
+	if (CHANGE_EVENT_TYPES.has(eventType)) return 'change';
 	if (eventType === 'failed_login' || eventType.startsWith('security_')) return 'security';
 	if (eventType.startsWith('php_') || eventType.startsWith('http_')) return 'error';
 	return 'system';
@@ -56,6 +68,27 @@ export const POST: RequestHandler = async ({ request, params }) => {
 	}
 
 	const data = parsed.data;
+	const category = data.category ?? defaultCategory(data.eventType);
+	const now = new Date();
+
+	// Discrete one-off facts (a plugin update, an activation, etc.) get their
+	// own timeline row - they should never be deduped/grouped like errors.
+	if (category === 'change') {
+		const [entry] = await db
+			.insert(activity)
+			.values({
+				siteId: site.id,
+				eventType: data.eventType,
+				category,
+				message: data.message.slice(0, 2000),
+				metadata: data.metadata ? sanitizeMetadata(data.metadata) : null,
+				occurredAt: now
+			})
+			.returning();
+
+		return json({ ok: true, activityId: entry.id });
+	}
+
 	const message = normalizeMessage(data.message);
 	const fingerprint = computeFingerprint({
 		eventType: data.eventType,
@@ -64,15 +97,13 @@ export const POST: RequestHandler = async ({ request, params }) => {
 		line: data.line
 	});
 
-	const now = new Date();
-
 	const [issue] = await db
 		.insert(issues)
 		.values({
 			siteId: site.id,
 			fingerprint,
 			eventType: data.eventType,
-			category: data.category ?? defaultCategory(data.eventType),
+			category,
 			severity: getBaseSeverity(data.eventType),
 			message,
 			file: data.file ?? null,

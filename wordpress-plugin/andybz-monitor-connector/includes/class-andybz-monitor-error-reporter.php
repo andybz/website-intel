@@ -152,52 +152,24 @@ class AndyBZ_Monitor_Error_Reporter {
 	}
 
 	/**
-	 * Sends a single event to the monitoring application. Non-blocking so a
-	 * slow/unreachable monitoring app never adds latency to the site's
-	 * response.
+	 * Sends a single event to the monitoring application via the shared
+	 * event client. Public so it's directly testable/reusable.
 	 *
 	 * @return true|WP_Error
 	 */
 	public function send_event( $event_type, $message, $file = '', $line = 0, $backtrace = null ) {
-		$connector = AndyBZ_Monitor_Connector::instance();
-
-		if ( ! $connector->is_connected() ) {
-			return new WP_Error( 'andybz_monitor_not_connected', __( 'This website is not connected yet.', 'andybz-monitor-connector' ) );
-		}
-
-		$settings = $connector->get_settings();
-		$url      = untrailingslashit( $settings['app_url'] ) . '/api/sites/' . rawurlencode( $settings['site_id'] ) . '/events';
-
-		$request_path = null;
-		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-			// Strip the query string client-side too - it may carry sensitive
-			// values, and the server also sanitizes this, but defense in depth.
-			$request_path = strtok( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), '?' );
-		}
-
 		$payload = array(
 			'eventType'  => $event_type,
 			'message'    => $message,
 			'file'       => $file ? $file : null,
 			'line'       => $line ? $line : null,
-			'requestUrl' => $request_path,
+			'requestUrl' => AndyBZ_Monitor_Event_Client::current_request_path(),
 		);
 
 		if ( $backtrace ) {
 			$payload['stackTrace'] = $backtrace;
 		}
 
-		return wp_remote_post(
-			$url,
-			array(
-				'timeout'   => 3,
-				'blocking'  => false,
-				'headers'   => array(
-					'Content-Type'  => 'application/json',
-					'Authorization' => 'Bearer ' . $settings['secret'],
-				),
-				'body'      => wp_json_encode( $payload ),
-			)
-		);
+		return AndyBZ_Monitor_Event_Client::send( $payload );
 	}
 }

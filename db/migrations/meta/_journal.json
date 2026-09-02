@@ -22,6 +22,13 @@
       "when": 1788375104389,
       "tag": "0002_wakeful_master_mold",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788375996218,
+      "tag": "0003_dazzling_wendell_rand",
+      "breakpoints": true
     }
   ]
 }

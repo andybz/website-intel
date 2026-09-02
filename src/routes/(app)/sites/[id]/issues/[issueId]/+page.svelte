@@ -18,7 +18,7 @@
 	<div class="rounded-xl border border-neutral-200 bg-white p-6">
 		<div class="flex flex-wrap items-center gap-2">
 			<SeverityBadge severity={data.issue.currentSeverity} />
-			{#if data.issue.status === 'resolved'}
+			{#if data.issue.displayStatus === 'resolved'}
 				<span class="text-xs font-medium text-emerald-600">Resolved</span>
 			{/if}
 		</div>
@@ -32,6 +32,12 @@
 				data.issue.lastSeen
 			)}.
 		</p>
+
+		{#if data.issue.displayStatus === 'resolved'}
+			<p class="mt-2 text-sm text-emerald-700">
+				No new occurrences have been detected recently.
+			</p>
+		{/if}
 	</div>
 
 	<details class="group rounded-xl border border-neutral-200 bg-white p-6">

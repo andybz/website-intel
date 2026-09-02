@@ -12,6 +12,38 @@
 
 ---
 
+### Implementation Progress (living log — keep updated as work completes)
+
+**Milestone 1 — Connected Sites: ✅ Complete**
+- SvelteKit + TypeScript + Tailwind CSS + PostgreSQL/Drizzle ORM foundation
+- Private single-user authentication (argon2, sessions), protected dashboard
+- Site CRUD, site detail pages (Overview/Issues/Activity/Traffic/WordPress tabs)
+- Secure pairing protocol (`/api/connect`) and heartbeat endpoint
+- WordPress connector plugin: pairing, heartbeat, WP/PHP/theme/plugin metadata
+- Verified end-to-end against a real production WordPress site (andybz.com) via a Cloudflare tunnel
+
+**Phase 1B — Error Monitoring: ✅ Complete**
+- Event ingestion endpoint, message normalization/fingerprinting, deduped grouping into Issues
+- Deterministic MVP severity scoring (README section 21 rules)
+- Issues list + issue detail UI with progressive disclosure ("View Technical Details")
+- Plugin captures real PHP errors/warnings/notices (`set_error_handler` + shutdown handler for fatals), with in-request dedup + cross-request throttling so it can't flood the site or the ingestion endpoint
+
+**Phase 1C — Useful Monitoring: 🟡 Mostly complete**
+- WordPress change tracking (plugin/theme/core updates, activations/deactivations) → new Activity tab, separate from the grouped Issues pipeline (these are discrete one-off facts, not recurring problems)
+- Failed login monitoring (security event; deliberately never captures the attempted username, since it may actually be a mistyped password)
+- Basic HTTP 404 tracking (grouped per-URL)
+- ⚠️ **NOT built yet — do not forget:** basic bot vs. human traffic classification and the "Real Visitors / Bots %" dashboard stats described in sections 15 and 26. This needs a new pageview-aggregation data model (hourly/daily rollups per section 54), which is a meaningfully separate feature from the error/change event pipeline built so far. Revisit this before considering Phase 1C fully done.
+
+**Phase 2 — Intelligence: 🚧 In progress**
+- Issue auto-resolution (derived: an issue is shown as "Resolved" once ~30 minutes pass with no new occurrences, per section 29 — no new occurrence flips it back to "open" automatically)
+- Not yet built: AI issue summaries/probable causes, refined Website Impact Score, email notifications, issue activity charts, event timelines, change correlation
+
+**Not started:** Phase 3 (anomaly detection, Ask Your Website), Phase 4 (server-level monitoring), Phase 5 (SaaS/agency features).
+
+**Deployment:** currently local-dev only (Docker Postgres + `npm run dev`, tested via Cloudflare quick tunnel). Production deployment to a live server is in progress.
+
+---
+
 # 1. Product Vision
 
 Build a standalone web application that monitors websites and explains their technical health in a clean, organized, non-intimidating interface.

@@ -20,11 +20,11 @@
 {:else}
 	<ul class="flex flex-col gap-3">
 		{#each data.issues as issue (issue.id)}
-			<li class="rounded-xl border border-neutral-200 bg-white px-5 py-4">
+			<li class="rounded-xl border border-neutral-200 bg-white px-5 py-4 {issue.displayStatus === 'resolved' ? 'opacity-60' : ''}">
 				<a href="/sites/{data.site.id}/issues/{issue.id}" class="flex flex-col gap-2">
 					<div class="flex flex-wrap items-center gap-2">
 						<SeverityBadge severity={issue.currentSeverity} />
-						{#if issue.status === 'resolved'}
+						{#if issue.displayStatus === 'resolved'}
 							<span class="text-xs font-medium text-emerald-600">Resolved</span>
 						{/if}
 					</div>

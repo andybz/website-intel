@@ -144,3 +144,6 @@ vite.config.ts.timestamp-*
 
 # WordPress plugin build artifact
 wordpress-plugin/*.zip
+
+# SvelteKit adapter-node build output
+/build

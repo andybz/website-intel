@@ -6,7 +6,14 @@ const BASE_SEVERITY: Record<string, number> = {
 	php_fatal: 7,
 	http_404: 1,
 	http_500: 6,
-	failed_login: 2
+	failed_login: 2,
+	// Discrete change events are routed to the activity log, not `issues`, but
+	// keep a low severity here too in case one ever falls through to issues.
+	plugin_updated: 1,
+	plugin_activated: 1,
+	plugin_deactivated: 1,
+	theme_updated: 1,
+	wordpress_updated: 1
 };
 
 const DEFAULT_SEVERITY = 3;

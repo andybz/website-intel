@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { issues } from '$db/schema';
 import { computeCurrentSeverity } from '$lib/server/severity';
+import { computeIssueStatus } from '$lib/utils/time';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { site } = await parent();
@@ -16,9 +17,13 @@ export const load: PageServerLoad = async ({ parent }) => {
 	const list = rows
 		.map((issue) => ({
 			...issue,
-			currentSeverity: computeCurrentSeverity(issue.severity, issue.occurrenceCount)
+			currentSeverity: computeCurrentSeverity(issue.severity, issue.occurrenceCount),
+			displayStatus: computeIssueStatus(issue.status, issue.lastSeen)
 		}))
-		.sort((a, b) => b.currentSeverity - a.currentSeverity);
+		.sort((a, b) => {
+			if (a.displayStatus !== b.displayStatus) return a.displayStatus === 'open' ? -1 : 1;
+			return b.currentSeverity - a.currentSeverity;
+		});
 
 	return { site, issues: list };
 };
