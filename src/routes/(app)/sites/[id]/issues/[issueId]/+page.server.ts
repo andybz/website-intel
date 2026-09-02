@@ -76,6 +76,18 @@ export const actions: Actions = {
 			console.error('Failed to generate AI issue summary:', err);
 			return fail(500, { error: 'Could not generate an explanation right now. Try again shortly.' });
 		}
+	},
+
+	// Manual resolve - lets a user close an issue immediately instead of
+	// waiting for the 30-min no-occurrence auto-resolve window (time.ts).
+	// A new occurrence still flips it back to 'open' automatically.
+	resolve: async ({ params }) => {
+		const issueId = Number(params.issueId);
+		if (!Number.isInteger(issueId)) return fail(404, { error: 'Issue not found.' });
+
+		await db.update(issues).set({ status: 'resolved', updatedAt: new Date() }).where(eq(issues.id, issueId));
+
+		return { success: true, resolved: true };
 	}
 };
 

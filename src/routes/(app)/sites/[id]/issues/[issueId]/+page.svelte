@@ -47,6 +47,15 @@
 			<p class="mt-2 text-sm text-emerald-700">
 				No new occurrences have been detected recently.
 			</p>
+		{:else}
+			<form method="POST" action="?/resolve" class="mt-4">
+				<button
+					type="submit"
+					class="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-emerald-50 hover:text-emerald-700"
+				>
+					Mark as Resolved
+				</button>
+			</form>
 		{/if}
 	</div>
 
