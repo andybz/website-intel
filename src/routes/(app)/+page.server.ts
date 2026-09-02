@@ -1,11 +1,40 @@
 import type { Actions, PageServerLoad } from './$types';
-import { eq } from 'drizzle-orm';
+import { eq, and, ne, gt } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
-import { sites } from '$db/schema';
+import { sites, issues } from '$db/schema';
+import { computeCurrentSeverity } from '$lib/server/severity';
+import { computeSiteHealth } from '$lib/server/health';
+
+const OPEN_ISSUE_WINDOW_MS = 1000 * 60 * 30;
 
 export const load: PageServerLoad = async () => {
 	const allSites = await db.select().from(sites);
+
+	const openIssues = await db
+		.select({
+			siteId: issues.siteId,
+			severity: issues.severity,
+			occurrenceCount: issues.occurrenceCount
+		})
+		.from(issues)
+		.where(and(ne(issues.status, 'resolved'), gt(issues.lastSeen, new Date(Date.now() - OPEN_ISSUE_WINDOW_MS))));
+
+	const severitiesBySite = new Map<number, number[]>();
+	for (const issue of openIssues) {
+		const currentSeverity = computeCurrentSeverity(issue.severity, issue.occurrenceCount);
+		const list = severitiesBySite.get(issue.siteId) ?? [];
+		list.push(currentSeverity);
+		severitiesBySite.set(issue.siteId, list);
+	}
+
+	const sitesWithHealth = allSites.map((site) => ({
+		...site,
+		health:
+			site.status === 'connected'
+				? computeSiteHealth(severitiesBySite.get(site.id) ?? [])
+				: null
+	}));
 
 	const summary = {
 		total: allSites.length,
@@ -14,7 +43,7 @@ export const load: PageServerLoad = async () => {
 		disconnected: allSites.filter((site) => site.status === 'disconnected').length
 	};
 
-	return { sites: allSites, summary };
+	return { sites: sitesWithHealth, summary };
 };
 
 export const actions: Actions = {

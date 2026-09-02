@@ -42,6 +42,7 @@
 - AI issue summaries (OpenAI `gpt-4o-mini`): on-demand, cached "what happened / who's affected / likely cause / recommended action" explanation per issue, sends only sanitized fields (never raw metadata)
 - Issue occurrence hourly charts (section 50): lightweight hourly rollup table (`issue_hourly_counts`) populated on every event ingestion, rendered as a dependency-free CSS bar chart on the issue detail page (last 48 hours, gap-filled with zero-count hours)
 - Issue trend detection (section 29 "Increasing/Decreasing" lifecycle): deterministic comparison of the last 6 hours of occurrence buckets vs. the prior 6 hours (`src/lib/server/trend.ts`), shown as an ▲ Increasing / ▼ Decreasing / ● New badge next to severity on the issue detail page
+- Website Health score (sections 13/15/20): deterministic 0-100 score + Healthy/Needs Attention/Critical status derived from currently-open issue severities (`src/lib/server/health.ts`), shown on both the dashboard site list and the site Overview page — a simplified stand-in for the full Website Impact Score
 - Not yet built: full refined Website Impact Score (needs traffic/visitor-impact signals, see backlog below), event timelines beyond the unified Activity view, change correlation
 
 **Not started:** Phase 3 (anomaly detection, Ask Your Website), Phase 4 (server-level monitoring), Phase 5 (SaaS/agency features).

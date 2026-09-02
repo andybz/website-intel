@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import StatCard from '$lib/components/StatCard.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	import HealthBadge from '$lib/components/HealthBadge.svelte';
 	import { formatRelativeTime } from '$lib/utils/time';
 
 	let { data }: { data: PageData } = $props();
@@ -63,6 +64,9 @@
 								{site.name}
 							</a>
 							<StatusBadge status={site.status} />
+							{#if site.health}
+								<HealthBadge status={site.health.status} score={site.health.score} />
+							{/if}
 						</div>
 						<p class="text-sm text-neutral-500">{site.url}</p>
 						{#if site.status === 'connected'}

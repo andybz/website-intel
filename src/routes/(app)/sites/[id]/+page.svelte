@@ -8,6 +8,18 @@
 	let stale = $derived(
 		data.site.status === 'connected' && isHeartbeatStale(data.site.lastHeartbeatAt)
 	);
+
+	const healthCopy: Record<string, string> = {
+		healthy: 'Your website is operating normally. No critical issues detected.',
+		needs_attention: 'Something worth reviewing has been detected on your website.',
+		critical: 'A critical issue may be affecting your website right now.'
+	};
+
+	const healthColor: Record<string, string> = {
+		healthy: 'text-emerald-600',
+		needs_attention: 'text-amber-600',
+		critical: 'text-red-600'
+	};
 </script>
 
 <svelte:head>
@@ -35,6 +47,16 @@
 			<p class="mt-1 text-sm text-red-700">
 				No heartbeat received recently. The website may be offline, or its cron/heartbeat process
 				may have stopped.
+			</p>
+		</div>
+	{/if}
+
+	{#if data.site.status !== 'pending'}
+		<div class="rounded-xl border border-neutral-200 bg-white px-6 py-5">
+			<p class="text-sm text-neutral-500">Website Health</p>
+			<p class="mt-1 text-4xl font-semibold text-neutral-900">{data.health.score}</p>
+			<p class="mt-1 text-sm font-medium {healthColor[data.health.status]}">
+				{healthCopy[data.health.status]}
 			</p>
 		</div>
 	{/if}
