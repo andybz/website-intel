@@ -33,7 +33,7 @@
 			{/if}
 		</div>
 
-		<h1 class="mt-3 text-lg font-semibold text-neutral-900">{data.issue.message}</h1>
+		<h1 class="mt-3 text-lg font-semibold break-words text-neutral-900">{data.issue.message}</h1>
 
 		<p class="mt-2 text-sm text-neutral-600">
 			Occurred {data.issue.occurrenceCount}

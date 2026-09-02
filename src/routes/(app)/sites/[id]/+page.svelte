@@ -108,7 +108,7 @@
 				<li class="rounded-xl border border-neutral-200 bg-white px-5 py-4">
 					<a href="/sites/{data.site.id}/issues/{issue.id}" class="flex flex-col gap-2">
 						<SeverityBadge severity={issue.currentSeverity} />
-						<p class="font-medium text-neutral-900">{issue.message}</p>
+						<p class="font-medium break-words text-neutral-900">{issue.message}</p>
 						<p class="text-sm text-neutral-500">
 							{issue.occurrenceCount}
 							{issue.occurrenceCount === 1 ? 'occurrence' : 'occurrences'} today · Last seen {formatRelativeTime(

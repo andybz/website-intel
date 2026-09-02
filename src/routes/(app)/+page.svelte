@@ -13,7 +13,7 @@
 </svelte:head>
 
 <div class="flex flex-col gap-8">
-	<div class="flex items-start justify-between gap-4">
+	<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 		<div>
 			<h1 class="text-2xl font-semibold text-neutral-900">Website Monitor</h1>
 			<p class="mt-1 text-sm text-neutral-500">
@@ -57,9 +57,9 @@
 	{:else}
 		<ul class="flex flex-col gap-3">
 			{#each data.sites as site (site.id)}
-				<li class="flex items-center justify-between gap-4 rounded-xl border border-neutral-200 bg-white px-5 py-4">
+				<li class="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
 					<div>
-						<div class="flex items-center gap-2">
+						<div class="flex flex-wrap items-center gap-2">
 							<a href="/sites/{site.id}" class="font-medium text-neutral-900 hover:underline">
 								{site.name}
 							</a>

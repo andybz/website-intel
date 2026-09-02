@@ -28,7 +28,7 @@
 							<span class="text-xs font-medium text-emerald-600">Resolved</span>
 						{/if}
 					</div>
-					<p class="font-medium text-neutral-900">{issue.message}</p>
+					<p class="font-medium break-words text-neutral-900">{issue.message}</p>
 					<p class="text-sm text-neutral-500">
 						{issue.occurrenceCount}
 						{issue.occurrenceCount === 1 ? 'occurrence' : 'occurrences'} · First seen {formatRelativeTime(

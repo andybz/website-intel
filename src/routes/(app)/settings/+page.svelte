@@ -85,8 +85,8 @@
 		<ul class="mt-4 flex flex-col gap-3">
 			{#each data.users as u (u.id)}
 				<li class="rounded-lg border border-neutral-200 px-4 py-3">
-					<div class="flex items-center justify-between gap-4">
-						<div>
+					<div class="flex flex-wrap items-center justify-between gap-3">
+						<div class="min-w-0 break-words">
 							<p class="font-medium text-neutral-900">
 								{u.email}
 								{#if u.id === data.user?.id}
