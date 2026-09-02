@@ -41,9 +41,23 @@
 - "What Happened" unified timeline on the Activity tab (merges Issues + Activity chronologically)
 - AI issue summaries (OpenAI `gpt-4o-mini`): on-demand, cached "what happened / who's affected / likely cause / recommended action" explanation per issue, sends only sanitized fields (never raw metadata)
 - Issue occurrence hourly charts (section 50): lightweight hourly rollup table (`issue_hourly_counts`) populated on every event ingestion, rendered as a dependency-free CSS bar chart on the issue detail page (last 48 hours, gap-filled with zero-count hours)
-- Not yet built: refined Website Impact Score, event timelines beyond the unified Activity view, change correlation
+- Issue trend detection (section 29 "Increasing/Decreasing" lifecycle): deterministic comparison of the last 6 hours of occurrence buckets vs. the prior 6 hours (`src/lib/server/trend.ts`), shown as an ▲ Increasing / ▼ Decreasing / ● New badge next to severity on the issue detail page
+- Not yet built: full refined Website Impact Score (needs traffic/visitor-impact signals, see backlog below), event timelines beyond the unified Activity view, change correlation
 
 **Not started:** Phase 3 (anomaly detection, Ask Your Website), Phase 4 (server-level monitoring), Phase 5 (SaaS/agency features).
+
+### Backlog — large items deferred for later review
+
+These are meaningfully-sized features intentionally NOT built yet. Each needs a product decision or a new data model, so they're parked here rather than built silently:
+
+- **Bot vs. human traffic classification** (sections 15, 26, 54) — needs a new pageview-aggregation data model (hourly/daily rollups), distinct from the error/change event pipeline. Blocks the "Real Visitors / Bots %" dashboard stats and the Traffic tab.
+- **Refined Website Impact Score** (section 20) — the full version factors in visitor impact and business-function affected, both of which depend on the traffic data model above. Current severity score + trend badge is a deliberately simple stand-in.
+- **Change correlation / AI Timeline correlation** (section 24) — correlating errors with recent WordPress changes (e.g. "checkout failures began 5 minutes after a plugin update"). README explicitly flags this as not-first-phase; the unified timeline exists, but no correlation logic yet.
+- **Anomaly detection & historical baselines** (section 30) — learning normal traffic/error volume per site and flagging deviations. Explicitly Phase 3.
+- **Ask Your Website** (section 31) — conversational AI interface grounded in monitoring data. Explicitly Phase 3.
+- **Server-level monitoring agent** (sections 36, 44) — Apache/NGINX/PHP-FPM/CPU/RAM/disk monitoring beyond what the WordPress plugin alone can see. Explicitly Phase 4.
+- **SaaS/agency features** (section 45) — multi-tenant orgs, billing, client reports, white-labeling. Explicitly Phase 5, deliberately excluded from the private v1 scope (section 3).
+- **AI remediation** (section 46) — auto-generating/applying fixes. Explicitly flagged as high-risk/future; AI should only observe/explain/recommend for now.
 
 **Deployment: ✅ Live** — self-hosted on the `abzdev` server (Ubuntu + Docker) at `https://monitor.andybz.com`, behind nginx + Let's Encrypt.
 - `Dockerfile` (Node 24, `adapter-node`) + `docker-compose.prod.yml` (app + Postgres containers)

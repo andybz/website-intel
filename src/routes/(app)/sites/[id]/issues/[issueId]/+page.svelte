@@ -24,6 +24,12 @@
 			<SeverityBadge severity={data.issue.currentSeverity} />
 			{#if data.issue.displayStatus === 'resolved'}
 				<span class="text-xs font-medium text-emerald-600">Resolved</span>
+			{:else if data.trend === 'increasing'}
+				<span class="text-xs font-medium text-red-600">▲ Increasing</span>
+			{:else if data.trend === 'decreasing'}
+				<span class="text-xs font-medium text-emerald-600">▼ Decreasing</span>
+			{:else if data.trend === 'new'}
+				<span class="text-xs font-medium text-amber-600">● New</span>
 			{/if}
 		</div>
 

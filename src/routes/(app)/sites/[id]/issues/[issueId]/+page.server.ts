@@ -6,6 +6,7 @@ import { issues, sites, issueHourlyCounts } from '$db/schema';
 import { computeCurrentSeverity } from '$lib/server/severity';
 import { computeIssueStatus } from '$lib/utils/time';
 import { generateIssueSummary } from '$lib/server/ai';
+import { computeTrend } from '$lib/server/trend';
 
 const CHART_HOURS = 48;
 
@@ -47,7 +48,8 @@ export const load: PageServerLoad = async ({ parent, params }) => {
 			currentSeverity: computeCurrentSeverity(issue.severity, issue.occurrenceCount),
 			displayStatus: computeIssueStatus(issue.status, issue.lastSeen)
 		},
-		chartBuckets
+		chartBuckets,
+		trend: computeTrend(chartBuckets)
 	};
 };
 
