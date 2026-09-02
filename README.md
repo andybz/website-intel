@@ -60,6 +60,11 @@ These are meaningfully-sized features intentionally NOT built yet. Each needs a 
 - **SaaS/agency features** (section 45) — multi-tenant orgs, billing, client reports, white-labeling. Explicitly Phase 5, deliberately excluded from the private v1 scope (section 3).
 - **AI remediation** (section 46) — auto-generating/applying fixes. Explicitly flagged as high-risk/future; AI should only observe/explain/recommend for now.
 
+**Hardening / polish (ongoing, not tied to a specific phase):**
+- Fixed a real bug where WP-Cron's page-load-triggered (not true background) scheduling caused false "Connection lost" banners on real low-traffic sites — relaxed the stale threshold and added an opportunistic non-blocking heartbeat trigger to the WordPress plugin (v0.2.0) that fires on any real request, independent of WP-Cron/`DISABLE_WP_CRON`.
+- Mobile responsiveness audit (section 51) against real iPhone-width viewports — fixed several genuine layout bugs (overflowing buttons, an unreachable nav tab, unwrapped long text) across the dashboard, site detail pages, and Settings.
+- Security headers baseline (section 52): CSP (via SvelteKit's built-in nonce support), HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy. CSRF and rate limiting were already adequately covered by existing code.
+
 **Deployment: ✅ Live** — self-hosted on the `abzdev` server (Ubuntu + Docker) at `https://monitor.andybz.com`, behind nginx + Let's Encrypt.
 - `Dockerfile` (Node 24, `adapter-node`) + `docker-compose.prod.yml` (app + Postgres containers)
 - Deploy flow: `git push abzdev main` → a post-receive hook on the server checks out the code, runs `docker compose up -d --build` (which also runs DB migrations on container start via `docker-entrypoint.sh`)
