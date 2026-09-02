@@ -15,6 +15,23 @@ export default defineConfig({
 			// Self-hosted on our own Docker/Node server behind nginx (see deploy/).
 			adapter: adapter(),
 
+			// SvelteKit manages the nonce/hash for its own inline hydration
+			// script automatically - hand-rolling this header in hooks.server.ts
+			// would block hydration (README section 52 baseline hardening).
+			csp: {
+				mode: 'auto',
+				directives: {
+					'default-src': ['self'],
+					'script-src': ['self'],
+					'style-src': ['self', 'unsafe-inline'],
+					'img-src': ['self', 'data:'],
+					'connect-src': ['self'],
+					'frame-ancestors': ['none'],
+					'base-uri': ['self'],
+					'form-action': ['self']
+				}
+			},
+
 			alias: {
 				// Points at the top-level db/ directory (schema + migrations), outside src/.
 				'$db': 'db',
