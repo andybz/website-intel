@@ -3,6 +3,7 @@
 	import { formatRelativeTime, isHeartbeatStale } from '$lib/utils/time';
 	import SeverityBadge from '$lib/components/SeverityBadge.svelte';
 	import EventTypeBadge from '$lib/components/EventTypeBadge.svelte';
+	import StatCard from '$lib/components/StatCard.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -62,6 +63,18 @@
 			<p class="mt-1 text-sm font-medium {healthColor[data.health.status]}">
 				{healthCopy[data.health.status]}
 			</p>
+		</div>
+	{/if}
+
+	{#if data.site.status === 'connected'}
+		<div>
+			<h2 class="text-base font-medium text-neutral-900">Today's Snapshot</h2>
+			<div class="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
+				<StatCard label="Real Visitors" value={data.traffic.humans} tone="green" />
+				<StatCard label="Bots" value={data.traffic.bots} tone="neutral" />
+				<StatCard label="Issues" value={data.issueCount} tone="yellow" />
+				<StatCard label="Critical" value={data.criticalCount} tone={data.criticalCount > 0 ? 'red' : 'neutral'} />
+			</div>
 		</div>
 	{/if}
 

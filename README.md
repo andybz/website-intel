@@ -33,7 +33,9 @@
 - WordPress change tracking (plugin/theme/core updates, activations/deactivations) → new Activity tab, separate from the grouped Issues pipeline (these are discrete one-off facts, not recurring problems)
 - Failed login monitoring (security event) — now also logs the attempted username and source IP address (per explicit user request), keeping only the MOST RECENT attempt's details per grouped issue (not a full history), still passed through the same sanitization pipeline as all other metadata
 - Basic HTTP 404 tracking (grouped per-URL)
-- ⚠️ **NOT built yet — do not forget:** basic bot vs. human traffic classification and the "Real Visitors / Bots %" dashboard stats described in sections 15 and 26. This needs a new pageview-aggregation data model (hourly/daily rollups per section 54), which is a meaningfully separate feature from the error/change event pipeline built so far. Revisit this before considering Phase 1C fully done.
+- Basic bot vs. human traffic classification (sections 15/26/54): new `pageview_hourly_counts` rollup table (hourly, per-classification counts — never raw per-request logs), a simple user-agent heuristic (`src/lib/server/traffic.ts` — human/search_crawler/ai_crawler/social_bot/monitoring_service/known_bot), a new `POST /api/sites/[uuid]/pageviews` ingestion endpoint, and a new plugin class (`class-andybz-monitor-traffic.php`, hooked to `wp_footer`, skips admin/AJAX/REST/cron) reporting one pageview signal per real front-end request. Powers the "Today's Snapshot" Real Visitors/Bots stat cards on the Overview page and a full Traffic tab (7-day human vs. bot trend chart + breakdown by type).
+
+**Phase 1C is now feature-complete** per the original MVP scope in this README.
 
 **Phase 2 — Intelligence: 🚧 In progress**
 - Issue auto-resolution (derived: an issue is shown as "Resolved" once ~30 minutes pass with no new occurrences, per section 29 — no new occurrence flips it back to "open" automatically)
@@ -54,13 +56,12 @@
 
 These are meaningfully-sized features intentionally NOT built yet. Each needs a product decision or a new data model, so they're parked here rather than built silently:
 
-- **Bot vs. human traffic classification** (sections 15, 26, 54) — needs a new pageview-aggregation data model (hourly/daily rollups), distinct from the error/change event pipeline. Blocks the "Real Visitors / Bots %" dashboard stats and the Traffic tab.
-- **Refined Website Impact Score** (section 20) — the full version factors in visitor impact and business-function affected, both of which depend on the traffic data model above. Current severity score + trend badge is a deliberately simple stand-in.
+- **Refined Website Impact Score** (section 20) — now that basic traffic classification exists, this is more feasible, but the full version still needs actual visitor-impact correlation (e.g. "this issue occurred during N real visitor sessions") and business-function tagging, neither of which exist yet. Current severity score + trend badge + health grade is still a deliberately simple stand-in.
 - **Change correlation / AI Timeline correlation** (section 24) — correlating errors with recent WordPress changes (e.g. "checkout failures began 5 minutes after a plugin update"). README explicitly flags this as not-first-phase; the unified timeline exists, but no correlation logic yet.
-- **Anomaly detection & historical baselines** (section 30) — learning normal traffic/error volume per site and flagging deviations. Explicitly Phase 3.
+- **Anomaly detection & historical baselines** (section 30) — learning normal traffic/error volume per site and flagging deviations. Now buildable on top of the new traffic/issue hourly data, but explicitly Phase 3, not started.
 - **Ask Your Website** (section 31) — conversational AI interface grounded in monitoring data. Explicitly Phase 3.
 - **Server-level monitoring agent** (sections 36, 44) — Apache/NGINX/PHP-FPM/CPU/RAM/disk monitoring beyond what the WordPress plugin alone can see. Explicitly Phase 4.
-- **SaaS/agency features** (section 45) — multi-tenant orgs, billing, client reports, white-labeling. Explicitly Phase 5, deliberately excluded from the private v1 scope (section 3).
+- **SaaS/agency features** (section 45) — multi-tenant orgs, billing, client reports, white-labeling. Explicitly Phase 5, deliberately excluded from the private v1 scope (section 3). **User has explicitly said this will NOT be addressed for a while — wants a solid single-tenant foundation first.**
 - **AI remediation** (section 46) — auto-generating/applying fixes automatically to a live monitored WordPress site. Explicitly flagged as high-risk/future; AI should only observe/explain/recommend for now. **Requested by user (2026-09-02)** as "actually resolve the issue for us" — deliberately NOT built without a dedicated scoping conversation first, since it requires the WordPress connector to gain WRITE capabilities it doesn't have today (currently telemetry-only, one-way), plus backups/rollback/confidence-thresholds/audit-trail per the README's own required safeguards. The safe half of this request (manual "Mark as Resolved" + AI-generated "Recommended Action" guidance) IS built — see above.
 
 **Hardening / polish (ongoing, not tied to a specific phase):**

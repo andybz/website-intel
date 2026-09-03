@@ -15,11 +15,12 @@ class AndyBZ_Monitor_Event_Client {
 	 * Sends a single event payload. Non-blocking so a slow/unreachable
 	 * monitoring app never adds latency to the site's response.
 	 *
-	 * @param array $payload eventType, message, and any optional fields
-	 *                       (category, file, line, stackTrace, requestUrl, metadata).
+	 * @param array  $payload  eventType, message, and any optional fields
+	 *                         (category, file, line, stackTrace, requestUrl, metadata).
+	 * @param string $endpoint Ingestion endpoint path segment, e.g. 'events' or 'pageviews'.
 	 * @return true|WP_Error
 	 */
-	public static function send( array $payload ) {
+	public static function send( array $payload, $endpoint = 'events' ) {
 		$connector = AndyBZ_Monitor_Connector::instance();
 
 		if ( ! $connector->is_connected() ) {
@@ -27,7 +28,7 @@ class AndyBZ_Monitor_Event_Client {
 		}
 
 		$settings = $connector->get_settings();
-		$url      = untrailingslashit( $settings['app_url'] ) . '/api/sites/' . rawurlencode( $settings['site_id'] ) . '/events';
+		$url      = untrailingslashit( $settings['app_url'] ) . '/api/sites/' . rawurlencode( $settings['site_id'] ) . '/' . $endpoint;
 
 		return wp_remote_post(
 			$url,

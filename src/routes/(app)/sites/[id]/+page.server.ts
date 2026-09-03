@@ -1,10 +1,12 @@
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, and, gte } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { issues } from '$db/schema';
+import { issues, pageviewHourlyCounts } from '$db/schema';
 import { computeCurrentSeverity } from '$lib/server/severity';
 import { computeIssueStatus } from '$lib/utils/time';
 import { computeSiteHealth } from '$lib/server/health';
+
+const TRAFFIC_WINDOW_MS = 1000 * 60 * 60 * 24;
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { site } = await parent();
@@ -30,5 +32,28 @@ export const load: PageServerLoad = async ({ parent }) => {
 
 	const health = computeSiteHealth(openIssues.map((issue) => issue.currentSeverity));
 
-	return { site, topIssues, issueCount: rows.length, health };
+	// "Today's Snapshot" (README section 15) - rolling 24h window, not calendar day.
+	const trafficRows = await db
+		.select()
+		.from(pageviewHourlyCounts)
+		.where(
+			and(
+				eq(pageviewHourlyCounts.siteId, site.id),
+				gte(pageviewHourlyCounts.hourStart, new Date(Date.now() - TRAFFIC_WINDOW_MS))
+			)
+		);
+
+	const traffic = {
+		humans: trafficRows.filter((r) => r.classification === 'human').reduce((sum, r) => sum + r.count, 0),
+		bots: trafficRows.filter((r) => r.classification !== 'human').reduce((sum, r) => sum + r.count, 0)
+	};
+
+	return {
+		site,
+		topIssues,
+		issueCount: rows.length,
+		health,
+		traffic,
+		criticalCount: openIssues.filter((issue) => issue.currentSeverity >= 8).length
+	};
 };
