@@ -14,7 +14,7 @@
 </script>
 
 <svelte:head>
-	<title>Settings — Website Monitor</title>
+	<title>Settings — CauseTrail</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-2xl flex-col gap-8">

@@ -1,16 +1,20 @@
 <script lang="ts">
 	import type { ActionData } from './$types';
+	import logo from '$lib/assets/favicon.svg';
 
 	let { form }: { form: ActionData } = $props();
 </script>
 
 <svelte:head>
-	<title>Sign in — Website Monitor</title>
+	<title>Sign in — CauseTrail</title>
 </svelte:head>
 
 <div class="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
 	<div class="w-full max-w-sm rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
-		<h1 class="text-xl font-semibold text-neutral-900">Website Monitor</h1>
+		<div class="flex items-center gap-2">
+			<img src={logo} alt="" class="h-7 w-7" />
+			<h1 class="text-xl font-semibold text-neutral-900">CauseTrail</h1>
+		</div>
 		<p class="mt-1 text-sm text-neutral-500">Sign in to your dashboard.</p>
 
 		<form method="POST" class="mt-6 flex flex-col gap-4">

@@ -3,7 +3,7 @@
 ## Initial Development Brief & Build Instructions
 
 ### Working Status
-**Product name:** TBD  
+**Product name:** CauseTrail (first-draft branding, logo/name may still change)  
 **Initial deployment:** `monitor.andybz.com`  
 **Initial user:** Andy / private internal use  
 **Initial supported platform:** WordPress  
@@ -67,6 +67,7 @@ These are meaningfully-sized features intentionally NOT built yet. Each needs a 
 - Fixed a real bug where WP-Cron's page-load-triggered (not true background) scheduling caused false "Connection lost" banners on real low-traffic sites — relaxed the stale threshold and added an opportunistic non-blocking heartbeat trigger to the WordPress plugin (v0.2.0) that fires on any real request, independent of WP-Cron/`DISABLE_WP_CRON`.
 - Mobile responsiveness audit (section 51) against real iPhone-width viewports — fixed several genuine layout bugs (overflowing buttons, an unreachable nav tab, unwrapped long text) across the dashboard, site detail pages, and Settings.
 - Security headers baseline (section 52): CSP (via SvelteKit's built-in nonce support), HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy. CSRF and rate limiting were already adequately covered by existing code.
+- First-draft branding applied: "CauseTrail" name + icon logo (`assets/images/`) now used across the header, favicon, login page, and all page titles/email subjects — explicitly a placeholder, expected to change again soon.
 
 **Deployment: ✅ Live** — self-hosted on the `abzdev` server (Ubuntu + Docker) at `https://monitor.andybz.com`, behind nginx + Let's Encrypt.
 - `Dockerfile` (Node 24, `adapter-node`) + `docker-compose.prod.yml` (app + Postgres containers)

@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>Edit {data.site.name} — Website Monitor</title>
+	<title>Edit {data.site.name} — CauseTrail</title>
 </svelte:head>
 
 <div class="mx-auto max-w-lg">

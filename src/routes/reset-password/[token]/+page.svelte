@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>Reset password — Website Monitor</title>
+	<title>Reset password — CauseTrail</title>
 </svelte:head>
 
 <div class="flex min-h-screen items-center justify-center bg-neutral-50 px-4">

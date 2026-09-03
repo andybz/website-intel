@@ -6,7 +6,7 @@
 </script>
 
 <svelte:head>
-	<title>Add Website — Website Monitor</title>
+	<title>Add Website — CauseTrail</title>
 </svelte:head>
 
 <div class="mx-auto max-w-lg">

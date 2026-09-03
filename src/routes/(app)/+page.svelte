@@ -10,13 +10,13 @@
 </script>
 
 <svelte:head>
-	<title>Website Monitor</title>
+	<title>CauseTrail</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 		<div>
-			<h1 class="text-2xl font-semibold text-neutral-900">Website Monitor</h1>
+			<h1 class="text-2xl font-semibold text-neutral-900">CauseTrail</h1>
 			<p class="mt-1 text-sm text-neutral-500">
 				{data.summary.total}
 				{data.summary.total === 1 ? 'Website' : 'Websites'}

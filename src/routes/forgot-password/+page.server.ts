@@ -35,7 +35,7 @@ export const actions: Actions = {
 			try {
 				await sendEmail({
 					to: user.email,
-					subject: 'Reset your Website Monitor password',
+					subject: 'Reset your CauseTrail password',
 					text: `Reset your password: ${resetUrl}\n\nThis link expires in 30 minutes. If you didn't request this, you can ignore this email.`,
 					html: `<p>Reset your password by clicking the link below:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>This link expires in 30 minutes. If you didn't request this, you can ignore this email.</p>`
 				});

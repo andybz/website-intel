@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 176" role="img" aria-labelledby="title desc">
+  <title id="title">CauseTrail reversed logo</title>
+  <desc id="desc">CauseTrail logo for use on dark backgrounds.</desc>
+  <defs>
+    <linearGradient id="trail" x1="23" y1="28" x2="139" y2="147" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.5" stop-color="#45A1FF"/>
+      <stop offset="1" stop-color="#39D8D2"/>
+    </linearGradient>
+    <linearGradient id="word" x1="485" y1="50" x2="724" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#45A1FF"/>
+      <stop offset="1" stop-color="#39D8D2"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(8 7) scale(.96)">
+    <path d="M43 34C87 15 125 39 122 76C121 92 113 108 99 119C77 136 43 128 31 104C19 80 25 52 43 34Z"
+          fill="none" stroke="#45A1FF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="43" cy="34" r="15" fill="#10284A" stroke="#FFFFFF" stroke-width="9"/>
+    <circle cx="121" cy="73" r="13" fill="#10284A" stroke="#45A1FF" stroke-width="9"/>
+    <circle cx="35" cy="104" r="12" fill="#10284A" stroke="#45A1FF" stroke-width="8"/>
+    <circle cx="99" cy="119" r="25" fill="#10284A" stroke="#39D8D2" stroke-width="10"/>
+    <circle cx="99" cy="119" r="12" fill="#FFFFFF"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="700" font-style="normal" letter-spacing="-3">
+    <text x="172" y="119" font-size="88" fill="#FFFFFF">Cause</text>
+    <text x="438" y="119" font-size="88" fill="#39D8D2">Trail</text>
+  </g>
+  <circle cx="208" cy="113" r="5.5" fill="#10284A" stroke="#FFFFFF" stroke-width="4"/>
+  <circle cx="457" cy="53" r="7" fill="#10284A" stroke="#45A1FF" stroke-width="5"/>
+</svg>
