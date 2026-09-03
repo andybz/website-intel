@@ -48,7 +48,8 @@
 - Website Health score (sections 13/15/20): deterministic 0-100 score + A-F letter grade + Healthy/Needs Attention/Critical status derived from currently-open issue severities (`src/lib/server/health.ts`), shown on both the dashboard site list and the site Overview page — a simplified stand-in for the full Website Impact Score. Uses a standard grading scale: 90+ (A)/80-89 (B) both read as Healthy, 70-79 (C) is Needs Attention, below 70 (D/F) is Critical.
 - "Latest Issues" per-site: each site's row on the dashboard now shows that site's single most-worth-knowing open issue inline (severity + message, linking straight to it) alongside its Connected/Health badges — no separate cross-site section
 - Manual "Mark as Resolved" on the issue detail page — lets a user close an issue immediately instead of waiting for the 30-min auto-resolve window; a new occurrence still flips it back to open automatically
-- Not yet built: full refined Website Impact Score (needs traffic/visitor-impact signals, see backlog below), event timelines beyond the unified Activity view, change correlation
+- Deterministic change correlation (section 24, simplified MVP version — no AI yet): the issue detail page now shows a "Possible related change" callout when a WordPress change (plugin/theme/core update, activation) occurred within 1 hour before the issue's first occurrence (`src/lib/server/correlation.ts`, time-proximity only, closest candidate wins)
+- Not yet built: full refined Website Impact Score (needs traffic/visitor-impact signals, see backlog below), event timelines beyond the unified Activity view, AI-powered correlation confidence scoring
 
 **Not started:** Phase 3 (anomaly detection, Ask Your Website), Phase 4 (server-level monitoring), Phase 5 (SaaS/agency features).
 
@@ -57,7 +58,7 @@
 These are meaningfully-sized features intentionally NOT built yet. Each needs a product decision or a new data model, so they're parked here rather than built silently:
 
 - **Refined Website Impact Score** (section 20) — now that basic traffic classification exists, this is more feasible, but the full version still needs actual visitor-impact correlation (e.g. "this issue occurred during N real visitor sessions") and business-function tagging, neither of which exist yet. Current severity score + trend badge + health grade is still a deliberately simple stand-in.
-- **Change correlation / AI Timeline correlation** (section 24) — correlating errors with recent WordPress changes (e.g. "checkout failures began 5 minutes after a plugin update"). README explicitly flags this as not-first-phase; the unified timeline exists, but no correlation logic yet.
+- **AI-powered change correlation / confidence scoring** (section 24) — a deterministic time-proximity MVP version now exists (see Phase 2 above: "Possible related change" callout). What's still missing is the full AI-scored version README envisions (e.g. "Confidence: 91%", ruling out coincidental timing, correlating across MULTIPLE signals at once). That richer version is still Phase 3+.
 - **Anomaly detection & historical baselines** (section 30) — learning normal traffic/error volume per site and flagging deviations. Now buildable on top of the new traffic/issue hourly data, but explicitly Phase 3, not started.
 - **Ask Your Website** (section 31) — conversational AI interface grounded in monitoring data. Explicitly Phase 3.
 - **Server-level monitoring agent** (sections 36, 44) — Apache/NGINX/PHP-FPM/CPU/RAM/disk monitoring beyond what the WordPress plugin alone can see. Explicitly Phase 4.

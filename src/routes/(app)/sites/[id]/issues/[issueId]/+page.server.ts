@@ -1,14 +1,16 @@
 import { error, fail } from '@sveltejs/kit';
-import { eq, and, gte } from 'drizzle-orm';
+import { eq, and, gte, lte } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { issues, sites, issueHourlyCounts } from '$db/schema';
+import { issues, sites, issueHourlyCounts, activity } from '$db/schema';
 import { computeCurrentSeverity } from '$lib/server/severity';
 import { computeIssueStatus } from '$lib/utils/time';
 import { generateIssueSummary } from '$lib/server/ai';
 import { computeTrend } from '$lib/server/trend';
+import { findRelatedChange } from '$lib/server/correlation';
 
 const CHART_HOURS = 48;
+const CORRELATION_WINDOW_MS = 1000 * 60 * 60;
 
 export const load: PageServerLoad = async ({ parent, params }) => {
 	const { site } = await parent();
@@ -41,6 +43,18 @@ export const load: PageServerLoad = async ({ parent, params }) => {
 		});
 	}
 
+	const recentChanges = await db
+		.select()
+		.from(activity)
+		.where(
+			and(
+				eq(activity.siteId, site.id),
+				lte(activity.occurredAt, issue.firstSeen),
+				gte(activity.occurredAt, new Date(issue.firstSeen.getTime() - CORRELATION_WINDOW_MS))
+			)
+		);
+	const relatedChange = findRelatedChange(recentChanges, issue.firstSeen, CORRELATION_WINDOW_MS);
+
 	return {
 		site,
 		issue: {
@@ -49,7 +63,8 @@ export const load: PageServerLoad = async ({ parent, params }) => {
 			displayStatus: computeIssueStatus(issue.status, issue.lastSeen)
 		},
 		chartBuckets,
-		trend: computeTrend(chartBuckets)
+		trend: computeTrend(chartBuckets),
+		relatedChange
 	};
 };
 

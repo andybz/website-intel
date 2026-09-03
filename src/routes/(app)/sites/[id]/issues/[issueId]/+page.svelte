@@ -10,6 +10,17 @@
 
 	let aiSummary = $derived(data.issue.aiSummary as IssueAiSummary | null);
 	let metadata = $derived(data.issue.metadata as { username?: string; ipAddress?: string } | null);
+
+	let relatedChangeMinutes = $derived(
+		data.relatedChange
+			? Math.max(
+					1,
+					Math.round(
+						(new Date(data.issue.firstSeen).getTime() - new Date(data.relatedChange.occurredAt).getTime()) / 60000
+					)
+				)
+			: null
+	);
 </script>
 
 <svelte:head>
@@ -61,6 +72,22 @@
 			</form>
 		{/if}
 	</div>
+
+	{#if data.relatedChange}
+		<div class="rounded-xl border border-blue-200 bg-blue-50 px-5 py-4">
+			<p class="text-sm font-medium text-blue-800">Possible related change</p>
+			<p class="mt-1 text-sm text-blue-700">
+				This issue was first detected {relatedChangeMinutes}
+				{relatedChangeMinutes === 1 ? 'minute' : 'minutes'} after: “{data.relatedChange.message}”
+			</p>
+			<a
+				href="/sites/{data.site.id}/activity"
+				class="mt-2 inline-block text-sm font-medium text-blue-800 hover:underline"
+			>
+				View Activity →
+			</a>
+		</div>
+	{/if}
 
 	<div class="rounded-xl border border-neutral-200 bg-white p-6">
 		<h2 class="text-base font-medium text-neutral-900">Occurrences (last 48 hours)</h2>
