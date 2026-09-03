@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { getPluginDescription } from '$lib/utils/plugin-descriptions';
 
 	let { data }: { data: PageData } = $props();
 </script>
@@ -47,13 +48,16 @@
 			<ul class="mt-3 flex flex-col gap-2">
 				{#each data.plugins as plugin (plugin.id)}
 					<li
-						class="flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-5 py-3"
+						class="flex items-center justify-between gap-4 rounded-xl border border-neutral-200 bg-white px-5 py-3"
 					>
 						<div>
 							<p class="font-medium text-neutral-900">{plugin.name}</p>
 							<p class="text-sm text-neutral-500">v{plugin.version ?? 'Unknown'}</p>
+							{#if getPluginDescription(plugin.slug)}
+								<p class="mt-1 text-sm text-neutral-600">{getPluginDescription(plugin.slug)}</p>
+							{/if}
 						</div>
-						<span class="text-sm {plugin.isActive ? 'text-emerald-600' : 'text-neutral-400'}">
+						<span class="shrink-0 text-sm {plugin.isActive ? 'text-emerald-600' : 'text-neutral-400'}">
 							{plugin.isActive ? 'Active' : 'Inactive'}
 						</span>
 					</li>
