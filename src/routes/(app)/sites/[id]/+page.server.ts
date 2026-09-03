@@ -1,37 +1,43 @@
-import { desc, eq, and, gte } from 'drizzle-orm';
+import { desc, eq, and, gte, gt, ne } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { issues, activity, pageviewHourlyCounts, sites } from '$db/schema';
 import { computeCurrentSeverity } from '$lib/server/severity';
-import { computeIssueStatus } from '$lib/utils/time';
 import { computeSiteHealth } from '$lib/server/health';
 import { answerWebsiteQuestion } from '$lib/server/ask';
 import { isRateLimited, recordAttempt } from '$lib/server/auth';
 
 const TRAFFIC_WINDOW_MS = 1000 * 60 * 60 * 24;
 
+// Matches computeIssueStatus's resolve-after threshold (src/lib/utils/time.ts)
+// - filtering at the query level (not a row-count limit) so a busy site can't
+// have its worst open issues silently truncated out of the health score.
+const OPEN_ISSUE_WINDOW_MS = 1000 * 60 * 30;
+
 export const load: PageServerLoad = async ({ parent }) => {
 	const { site } = await parent();
 
-	const rows = await db
+	const openIssueRows = await db
 		.select()
 		.from(issues)
-		.where(eq(issues.siteId, site.id))
-		.orderBy(desc(issues.lastSeen))
-		.limit(20);
+		.where(
+			and(
+				eq(issues.siteId, site.id),
+				ne(issues.status, 'resolved'),
+				gt(issues.lastSeen, new Date(Date.now() - OPEN_ISSUE_WINDOW_MS))
+			)
+		)
+		.orderBy(desc(issues.lastSeen));
 
-	const withStatus = rows.map((issue) => ({
+	const openIssues = openIssueRows.map((issue) => ({
 		...issue,
-		currentSeverity: computeCurrentSeverity(issue.severity, issue.occurrenceCount),
-		displayStatus: computeIssueStatus(issue.status, issue.lastSeen)
+		currentSeverity: computeCurrentSeverity(issue.severity, issue.occurrenceCount)
 	}));
-
-	const openIssues = withStatus.filter((issue) => issue.displayStatus === 'open');
 
 	// Only surface currently-open issues in the "worth knowing" summary -
 	// resolved ones aren't worth a glance-level mention anymore.
-	const topIssues = openIssues.sort((a, b) => b.currentSeverity - a.currentSeverity).slice(0, 3);
+	const topIssues = [...openIssues].sort((a, b) => b.currentSeverity - a.currentSeverity).slice(0, 3);
 
 	const health = computeSiteHealth(openIssues.map((issue) => issue.currentSeverity));
 
@@ -54,7 +60,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 	return {
 		site,
 		topIssues,
-		issueCount: rows.length,
+		issueCount: openIssues.length,
 		health,
 		traffic,
 		criticalCount: openIssues.filter((issue) => issue.currentSeverity >= 8).length
@@ -89,20 +95,24 @@ export const actions: Actions = {
 		const openIssueRows = await db
 			.select()
 			.from(issues)
-			.where(eq(issues.siteId, siteId))
-			.orderBy(desc(issues.lastSeen))
-			.limit(20);
-		const openIssues = openIssueRows
-			.map((issue) => ({
-				...issue,
-				currentSeverity: computeCurrentSeverity(issue.severity, issue.occurrenceCount),
-				displayStatus: computeIssueStatus(issue.status, issue.lastSeen)
-			}))
-			.filter((issue) => issue.displayStatus === 'open')
-			.sort((a, b) => b.currentSeverity - a.currentSeverity)
-			.slice(0, 10);
+			.where(
+				and(
+					eq(issues.siteId, siteId),
+					ne(issues.status, 'resolved'),
+					gt(issues.lastSeen, new Date(Date.now() - OPEN_ISSUE_WINDOW_MS))
+				)
+			)
+			.orderBy(desc(issues.lastSeen));
+		const openIssuesAll = openIssueRows.map((issue) => ({
+			...issue,
+			currentSeverity: computeCurrentSeverity(issue.severity, issue.occurrenceCount)
+		}));
 
-		const health = computeSiteHealth(openIssues.map((issue) => issue.currentSeverity));
+		const health = computeSiteHealth(openIssuesAll.map((issue) => issue.currentSeverity));
+
+		// Cap what's sent to the AI model's context, after health is already scored
+		// from the full open set - keeps the score accurate regardless of prompt size.
+		const openIssues = [...openIssuesAll].sort((a, b) => b.currentSeverity - a.currentSeverity).slice(0, 10);
 
 		const recentActivityRows = await db
 			.select()
