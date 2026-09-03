@@ -9,7 +9,13 @@
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let aiSummary = $derived(data.issue.aiSummary as IssueAiSummary | null);
-	let metadata = $derived(data.issue.metadata as { username?: string; ipAddress?: string } | null);
+	let metadata = $derived(
+		data.issue.metadata as {
+			username?: string;
+			ipAddress?: string;
+			topPaths?: { path: string; count: number }[];
+		} | null
+	);
 
 	let relatedChangeMinutes = $derived(
 		data.relatedChange
@@ -87,6 +93,24 @@
 			>
 				View Activity →
 			</a>
+		</div>
+	{/if}
+
+	{#if metadata?.topPaths && metadata.topPaths.length > 0}
+		<div class="rounded-xl border border-neutral-200 bg-white p-6">
+			<h2 class="text-base font-medium text-neutral-900">Most Requested Paths</h2>
+			<p class="mt-1 text-sm text-neutral-500">
+				Many distinct, unrelated paths usually means automated scanning/bot traffic rather than a
+				real broken link on your site.
+			</p>
+			<ul class="mt-4 flex flex-col gap-2">
+				{#each metadata.topPaths as entry (entry.path)}
+					<li class="flex items-center justify-between gap-4 border-b border-neutral-100 pb-2 text-sm last:border-0 last:pb-0">
+						<span class="truncate font-mono text-neutral-700">{entry.path}</span>
+						<span class="shrink-0 font-medium text-neutral-500">{entry.count}×</span>
+					</li>
+				{/each}
+			</ul>
 		</div>
 	{/if}
 

@@ -13,7 +13,8 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
-		"db:create-user": "tsx scripts/create-user.ts"
+		"db:create-user": "tsx scripts/create-user.ts",
+		"db:consolidate-404s": "tsx scripts/consolidate-404-issues.ts"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.1",

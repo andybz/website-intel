@@ -2,7 +2,7 @@
 /**
  * Plugin Name: AndyBZ Monitor Connector
  * Description: Securely connects this WordPress website to the AndyBZ Website Monitor platform.
- * Version: 0.4.0
+ * Version: 0.5.0
  * Requires PHP: 7.4
  * Author: Andy
  * License: GPL-2.0-or-later
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'ANDYBZ_MONITOR_VERSION', '0.4.0' );
+define( 'ANDYBZ_MONITOR_VERSION', '0.5.0' );
 define( 'ANDYBZ_MONITOR_OPTION', 'andybz_monitor_connector' );
 define( 'ANDYBZ_MONITOR_DEFAULT_APP_URL', 'https://monitor.andybz.com' );
 define( 'ANDYBZ_MONITOR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );

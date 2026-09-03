@@ -147,3 +147,4 @@ wordpress-plugin/*.zip
 
 # SvelteKit adapter-node build output
 /build
+.DS_Store

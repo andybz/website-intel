@@ -136,17 +136,65 @@ class AndyBZ_Monitor_Change_Tracker {
 		}
 
 		$path = AndyBZ_Monitor_Event_Client::current_request_path();
+		$top_paths = $this->track_404_path( $path ? $path : '(unknown)' );
 
 		AndyBZ_Monitor_Event_Client::send(
 			array(
 				'eventType'  => 'http_404',
 				'category'   => 'error',
-				// Include the path in the message so distinct URLs group into
-				// distinct issues (e.g. README's "10,000 favicon 404s" example).
-				'message'    => sprintf( 'Page not found: %s', $path ? $path : '(unknown)' ),
+				// Deliberately NOT path-specific (unlike other event types) - real
+				// sites see hundreds of distinct bot-probed paths (wp-config.php,
+				// .env, random plugin slugs, etc.) that would otherwise each
+				// become their own issue and flood the Issues list. All 404s on
+				// a site consolidate into one issue; the specific paths are
+				// still visible via requestUrl (most recent) and metadata (top
+				// offenders), same pattern as failed_login's throttled grouping.
+				'message'    => 'Pages not found are being requested on this website',
 				'requestUrl' => $path,
+				'metadata'   => array(
+					'topPaths' => $top_paths,
+				),
 			)
 		);
+	}
+
+	/**
+	 * Rolling tally of the most-requested 404 paths, so the single grouped
+	 * issue can still show what's actually being hit (e.g. a legitimate
+	 * broken internal link vs. bot scanning for vulnerable file paths).
+	 * Stored in a transient (not an option) since it's disposable, high-churn
+	 * data - resets itself every 7 days rather than growing forever.
+	 *
+	 * @return array List of ['path' => string, 'count' => int], top 10 by count.
+	 */
+	private function track_404_path( $path ) {
+		$transient_key = 'andybz_monitor_404_paths';
+		$tally         = get_transient( $transient_key );
+		if ( ! is_array( $tally ) ) {
+			$tally = array();
+		}
+
+		$path = mb_substr( $path, 0, 300 );
+		$tally[ $path ] = ( isset( $tally[ $path ] ) ? $tally[ $path ] : 0 ) + 1;
+
+		// Cap distinct paths tracked so a determined scanner can't grow this
+		// transient unbounded - keep only the most frequent ones.
+		if ( count( $tally ) > 100 ) {
+			arsort( $tally );
+			$tally = array_slice( $tally, 0, 100, true );
+		}
+
+		set_transient( $transient_key, $tally, 7 * DAY_IN_SECONDS );
+
+		arsort( $tally );
+		$top = array();
+		foreach ( array_slice( $tally, 0, 10, true ) as $top_path => $count ) {
+			$top[] = array(
+				'path'  => $top_path,
+				'count' => $count,
+			);
+		}
+		return $top;
 	}
 
 	private function plugin_name_from_file( $plugin_file ) {
