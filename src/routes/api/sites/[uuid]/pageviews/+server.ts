@@ -6,6 +6,7 @@ import { db } from '$lib/server/db';
 import { sites, pageviewHourlyCounts } from '$db/schema';
 import { verifyApiSecret } from '$lib/server/site-auth';
 import { classifyUserAgent } from '$lib/server/traffic';
+import { maybeRunRetentionCleanup } from '$lib/server/retention';
 
 const pageviewSchema = z.object({
 	userAgent: z.string().trim().max(500).optional()
@@ -52,6 +53,8 @@ export const POST: RequestHandler = async ({ request, params }) => {
 			target: [pageviewHourlyCounts.siteId, pageviewHourlyCounts.hourStart, pageviewHourlyCounts.classification],
 			set: { count: sql`${pageviewHourlyCounts.count} + 1` }
 		});
+
+	void maybeRunRetentionCleanup();
 
 	return json({ ok: true });
 };

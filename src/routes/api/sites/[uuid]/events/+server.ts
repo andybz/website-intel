@@ -10,6 +10,7 @@ import { getBaseSeverity, computeCurrentSeverity, NOTIFICATION_SEVERITY_THRESHOL
 import { sanitizeMetadata, sanitizeRequestUrl } from '$lib/server/sanitize';
 import { computeIssueStatus } from '$lib/utils/time';
 import { notifyIssue } from '$lib/server/notify';
+import { maybeRunRetentionCleanup } from '$lib/server/retention';
 
 const eventSchema = z.object({
 	eventType: z.string().trim().min(1).max(50),
@@ -87,6 +88,8 @@ export const POST: RequestHandler = async ({ request, params }) => {
 				occurredAt: now
 			})
 			.returning();
+
+		void maybeRunRetentionCleanup();
 
 		return json({ ok: true, activityId: entry.id });
 	}
@@ -170,6 +173,8 @@ export const POST: RequestHandler = async ({ request, params }) => {
 			console.error('Failed to send issue notification email:', err);
 		}
 	}
+
+	void maybeRunRetentionCleanup();
 
 	return json({ ok: true, issueId: issue.id, occurrenceCount: issue.occurrenceCount });
 };

@@ -5,6 +5,7 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { sites, sitePlugins } from '$db/schema';
 import { verifyApiSecret } from '$lib/server/site-auth';
+import { maybeRunRetentionCleanup } from '$lib/server/retention';
 
 const pluginSchema = z.object({
 	slug: z.string().trim().min(1).max(255),
@@ -83,6 +84,8 @@ export const POST: RequestHandler = async ({ request, params }) => {
 			);
 		}
 	}
+
+	void maybeRunRetentionCleanup();
 
 	return json({ ok: true, lastSeen: now.toISOString() });
 };
