@@ -6,8 +6,8 @@
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 </script>
 
-<div class="min-h-screen bg-neutral-50">
-	<header class="bg-brand-navy relative border-b border-white/10" style="background-color: var(--color-brand-navy)">
+<div class="brand-glow-backdrop min-h-screen">
+	<header class="relative border-b border-white/10">
 		<div
 			class="pointer-events-none absolute inset-0 opacity-40"
 			style="background-image: linear-gradient(90deg, transparent, var(--color-brand-blue), var(--color-brand-teal), transparent); height: 1px; top: auto; bottom: 0;"

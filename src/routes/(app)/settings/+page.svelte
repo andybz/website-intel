@@ -18,7 +18,7 @@
 </svelte:head>
 
 <div class="mx-auto flex max-w-2xl flex-col gap-8">
-	<h1 class="text-2xl font-semibold text-neutral-900">Settings</h1>
+	<h1 class="text-2xl font-semibold text-white">Settings</h1>
 
 	<div class="rounded-xl border border-neutral-200 bg-white p-6">
 		<h2 class="text-base font-medium text-neutral-900">Change your password</h2>

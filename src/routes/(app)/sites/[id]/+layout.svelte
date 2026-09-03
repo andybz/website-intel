@@ -17,30 +17,30 @@
 
 <div class="flex flex-col gap-6">
 	<div>
-		<a href="/" class="text-sm text-neutral-500 hover:text-neutral-700">&larr; Back to dashboard</a>
+		<a href="/" class="text-sm text-white/60 hover:text-white">&larr; Back to dashboard</a>
 
 		<div class="mt-3 flex items-center justify-between gap-4">
 			<div class="flex items-center gap-3">
-				<h1 class="text-2xl font-bold tracking-tight text-neutral-900">{data.site.name}</h1>
+				<h1 class="text-2xl font-bold tracking-tight text-white">{data.site.name}</h1>
 				<StatusBadge status={data.site.status} />
 			</div>
 			<a
 				href="/sites/{data.site.id}/edit"
-				class="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+				class="rounded-md border border-white/15 px-3 py-1.5 text-sm font-medium text-white/80 hover:bg-white/10"
 			>
 				Edit
 			</a>
 		</div>
-		<p class="text-sm text-neutral-500">{data.site.url}</p>
+		<p class="text-sm text-white/60">{data.site.url}</p>
 	</div>
 
-	<nav class="flex gap-1 overflow-x-auto border-b border-neutral-200">
+	<nav class="flex gap-1 overflow-x-auto border-b border-white/10">
 		{#each tabs as tab (tab.href)}
 			<a
 				href={tab.href}
 				class="shrink-0 border-b-2 px-3 py-2 text-sm font-medium transition {page.url.pathname === tab.href
-					? 'text-neutral-900'
-					: 'border-transparent text-neutral-500 hover:text-neutral-700'}"
+					? 'text-white'
+					: 'border-transparent text-white/50 hover:text-white/80'}"
 				style={page.url.pathname === tab.href
 					? 'border-image: linear-gradient(90deg, var(--color-brand-blue), var(--color-brand-teal)) 1'
 					: ''}

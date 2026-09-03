@@ -98,7 +98,7 @@
 
 	{#if data.site.status === 'connected'}
 		<div>
-			<h2 class="text-base font-medium text-neutral-900">Today's Snapshot</h2>
+			<h2 class="text-base font-medium text-white">Today's Snapshot</h2>
 			<div class="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
 				<StatCard label="Real Visitors" value={data.traffic.humans} tone="green" />
 				<StatCard label="Bots" value={data.traffic.bots} tone="neutral" />
@@ -134,9 +134,9 @@
 	</div>
 
 	<div class="flex items-center justify-between">
-		<h2 class="text-base font-medium text-neutral-900">Things worth knowing</h2>
+		<h2 class="text-base font-medium text-white">Things worth knowing</h2>
 		{#if data.issueCount > 0}
-			<a href="/sites/{data.site.id}/issues" class="text-sm text-neutral-500 hover:text-neutral-700">
+			<a href="/sites/{data.site.id}/issues" class="text-sm text-white/60 hover:text-white">
 				View all issues &rarr;
 			</a>
 		{/if}

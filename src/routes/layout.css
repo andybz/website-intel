@@ -46,11 +46,50 @@
 	transform: scale(0.98);
 }
 
-/* Subtle radial glow used behind hero/login moments - never a full pattern
-   or busy texture, just a soft brand-colored ambience. */
+/* Ambient navy backdrop with two drifting brand-colored nebulae and a faint
+   starfield dot grid - a soft, slow-moving "spaceship cockpit" ambience.
+   Never a full pattern or busy texture, just a subtle sense of motion. */
 .brand-glow-backdrop {
 	background-color: var(--color-brand-navy);
 	background-image:
-		radial-gradient(600px circle at 15% 20%, color-mix(in srgb, var(--color-brand-blue) 35%, transparent), transparent 60%),
-		radial-gradient(500px circle at 85% 80%, color-mix(in srgb, var(--color-brand-teal) 30%, transparent), transparent 60%);
+		radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1.5px),
+		radial-gradient(45% 45% at center, color-mix(in srgb, var(--color-brand-blue) 38%, transparent), transparent 70%),
+		radial-gradient(40% 40% at center, color-mix(in srgb, var(--color-brand-teal) 32%, transparent), transparent 70%);
+	background-repeat: repeat, no-repeat, no-repeat;
+	background-size:
+		26px 26px,
+		140% 140%,
+		140% 140%;
+	background-position:
+		0 0,
+		5% 10%,
+		95% 90%;
+	animation: brand-glow-drift 24s ease-in-out infinite alternate;
+}
+
+@keyframes brand-glow-drift {
+	0% {
+		background-position:
+			0 0,
+			5% 10%,
+			95% 90%;
+	}
+	50% {
+		background-position:
+			6px 4px,
+			20% 30%,
+			78% 68%;
+	}
+	100% {
+		background-position:
+			0 0,
+			10% 5%,
+			90% 95%;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.brand-glow-backdrop {
+		animation: none;
+	}
 }

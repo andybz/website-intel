@@ -10,7 +10,7 @@
 </svelte:head>
 
 <div class="mx-auto max-w-lg">
-	<a href="/" class="text-sm text-neutral-500 hover:text-neutral-700">&larr; Back to dashboard</a>
+	<a href="/" class="text-sm text-white/60 hover:text-white">&larr; Back to dashboard</a>
 
 	{#if form?.success}
 		<div class="mt-4">

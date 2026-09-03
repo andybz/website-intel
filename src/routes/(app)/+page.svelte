@@ -16,15 +16,15 @@
 <div class="flex flex-col gap-8">
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 		<div>
-			<h1 class="text-2xl font-bold tracking-tight text-neutral-900">CauseTrail</h1>
-			<p class="mt-1 text-sm text-neutral-500">
+			<h1 class="text-2xl font-bold tracking-tight text-white">CauseTrail</h1>
+			<p class="mt-1 text-sm text-white/60">
 				{data.summary.total}
 				{data.summary.total === 1 ? 'Website' : 'Websites'}
 			</p>
 		</div>
 
 		<div class="flex items-center gap-3">
-			<a href="/settings#add-user" class="text-sm text-neutral-500 hover:text-neutral-700">
+			<a href="/settings#add-user" class="text-sm text-white/60 hover:text-white">
 				Create account
 			</a>
 			{#if data.sites.length > 0}

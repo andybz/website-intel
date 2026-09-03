@@ -28,7 +28,7 @@
 </svelte:head>
 
 <div class="flex flex-col gap-6">
-	<a href="/sites/{data.site.id}/issues" class="text-sm text-neutral-500 hover:text-neutral-700">
+	<a href="/sites/{data.site.id}/issues" class="text-sm text-white/60 hover:text-white">
 		&larr; Back to issues
 	</a>
 

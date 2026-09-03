@@ -32,7 +32,7 @@
 	</div>
 
 	<div>
-		<h2 class="text-base font-medium text-neutral-900">Plugins</h2>
+		<h2 class="text-base font-medium text-white">Plugins</h2>
 
 		{#if data.plugins.length === 0}
 			<div
