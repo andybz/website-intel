@@ -7,6 +7,36 @@
 	import { formatRelativeTime } from '$lib/utils/time';
 
 	let { data }: { data: PageData } = $props();
+
+	type SortMode = 'health' | 'name' | 'recent-issue';
+	const sortOptions: { mode: SortMode; label: string }[] = [
+		{ mode: 'health', label: 'Health' },
+		{ mode: 'name', label: 'Name' },
+		{ mode: 'recent-issue', label: 'Most Recent Issue' }
+	];
+	let sortMode = $state<SortMode>('health');
+
+	let sortedSites = $derived.by(() => {
+		const list = [...data.sites];
+		if (sortMode === 'name') {
+			return list.sort((a, b) => a.name.localeCompare(b.name));
+		}
+		if (sortMode === 'recent-issue') {
+			return list.sort((a, b) => {
+				const aTime = a.latestIssue ? new Date(a.latestIssue.lastSeen).getTime() : 0;
+				const bTime = b.latestIssue ? new Date(b.latestIssue.lastSeen).getTime() : 0;
+				return bTime - aTime;
+			});
+		}
+		// 'health' - worst (lowest score) first; sites without a score (not yet
+		// connected) sink to the bottom rather than being treated as healthiest.
+		return list.sort((a, b) => {
+			if (!a.health && !b.health) return 0;
+			if (!a.health) return 1;
+			if (!b.health) return -1;
+			return a.health.score - b.health.score;
+		});
+	});
 </script>
 
 <svelte:head>
@@ -50,8 +80,25 @@
 			</a>
 		</div>
 	{:else}
+		{#if data.sites.length > 1}
+			<div class="flex flex-wrap items-center gap-2">
+				<span class="text-sm text-white/50">Sort by</span>
+				{#each sortOptions as option (option.mode)}
+					<button
+						type="button"
+						onclick={() => (sortMode = option.mode)}
+						class="rounded-full px-3 py-1 text-xs font-medium transition {sortMode === option.mode
+							? 'brand-gradient-bg text-white'
+							: 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}"
+					>
+						{option.label}
+					</button>
+				{/each}
+			</div>
+		{/if}
+
 		<ul class="flex flex-col gap-3">
-			{#each data.sites as site (site.id)}
+			{#each sortedSites as site (site.id)}
 				<li class="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white px-5 py-4 transition hover:border-neutral-300 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between">
 					<div class="flex items-center gap-4">
 						{#if site.health}
