@@ -9,6 +9,8 @@ import { answerWebsiteQuestion } from '$lib/server/ask';
 import { isRateLimited, recordAttempt } from '$lib/server/auth';
 
 const TRAFFIC_WINDOW_MS = 1000 * 60 * 60 * 24;
+const TREND_DAYS = 7;
+const TREND_WINDOW_MS = 1000 * 60 * 60 * 24 * TREND_DAYS;
 
 // Matches computeIssueStatus's resolve-after threshold (src/lib/utils/time.ts)
 // - filtering at the query level (not a row-count limit) so a busy site can't
@@ -57,12 +59,39 @@ export const load: PageServerLoad = async ({ parent }) => {
 		bots: trafficRows.filter((r) => r.classification !== 'human').reduce((sum, r) => sum + r.count, 0)
 	};
 
+	// 7-day human vs. bot trend for the Overview hero chart - same gap-filled
+	// daily bucketing approach as the Traffic tab, so the two stay consistent.
+	const trendRows = await db
+		.select()
+		.from(pageviewHourlyCounts)
+		.where(
+			and(
+				eq(pageviewHourlyCounts.siteId, site.id),
+				gte(pageviewHourlyCounts.hourStart, new Date(Date.now() - TREND_WINDOW_MS))
+			)
+		);
+
+	const trafficTrend: { label: string; humans: number; bots: number }[] = [];
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	for (let i = TREND_DAYS - 1; i >= 0; i--) {
+		const dayStart = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+		const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+		const dayRows = trendRows.filter((r) => r.hourStart >= dayStart && r.hourStart < dayEnd);
+		trafficTrend.push({
+			label: dayStart.toLocaleDateString([], { weekday: 'short' }),
+			humans: dayRows.filter((r) => r.classification === 'human').reduce((sum, r) => sum + r.count, 0),
+			bots: dayRows.filter((r) => r.classification !== 'human').reduce((sum, r) => sum + r.count, 0)
+		});
+	}
+
 	return {
 		site,
 		topIssues,
 		issueCount: openIssues.length,
 		health,
 		traffic,
+		trafficTrend,
 		criticalCount: openIssues.filter((issue) => issue.currentSeverity >= 8).length
 	};
 };

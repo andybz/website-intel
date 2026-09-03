@@ -24,7 +24,7 @@ export default defineConfig({
 					'default-src': ['self'],
 					'script-src': ['self'],
 					'style-src': ['self', 'unsafe-inline'],
-					'img-src': ['self', 'data:'],
+					'img-src': ['self', 'data:', 'https://s.wordpress.com', 'https://*.wp.com'],
 					'connect-src': ['self'],
 					'frame-ancestors': ['none'],
 					'base-uri': ['self'],

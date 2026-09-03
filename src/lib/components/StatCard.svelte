@@ -2,11 +2,13 @@
 	let {
 		label,
 		value,
-		tone = 'neutral'
+		tone = 'neutral',
+		size = 'md'
 	}: {
 		label: string;
 		value: number;
 		tone?: 'green' | 'yellow' | 'orange' | 'red' | 'neutral';
+		size?: 'md' | 'lg';
 	} = $props();
 
 	const toneClasses: Record<string, string> = {
@@ -23,5 +25,7 @@
 		<div class="brand-gradient-bg absolute inset-x-0 top-0 h-0.5"></div>
 	{/if}
 	<p class="text-sm text-neutral-500">{label}</p>
-	<p class="mt-1 text-2xl font-semibold {toneClasses[tone]}">{value}</p>
+	<p class="mt-1 font-bold tracking-tight {size === 'lg' ? 'text-4xl' : 'text-2xl font-semibold'} {toneClasses[tone]}">
+		{value}
+	</p>
 </div>
