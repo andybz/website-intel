@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { formatRelativeTime, isHeartbeatStale } from '$lib/utils/time';
 	import SeverityBadge from '$lib/components/SeverityBadge.svelte';
+	import EventTypeBadge from '$lib/components/EventTypeBadge.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -110,7 +111,10 @@
 			{#each data.topIssues as issue (issue.id)}
 				<li class="rounded-xl border border-neutral-200 bg-white px-5 py-4">
 					<a href="/sites/{data.site.id}/issues/{issue.id}" class="flex flex-col gap-2">
-						<SeverityBadge severity={issue.currentSeverity} />
+						<div class="flex flex-wrap items-center gap-2">
+							<SeverityBadge severity={issue.currentSeverity} />
+							<EventTypeBadge eventType={issue.eventType} />
+						</div>
 						<p class="font-medium break-words text-neutral-900">{issue.message}</p>
 						<p class="text-sm text-neutral-500">
 							{issue.occurrenceCount}

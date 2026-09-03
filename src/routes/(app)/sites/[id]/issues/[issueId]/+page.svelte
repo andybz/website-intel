@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import SeverityBadge from '$lib/components/SeverityBadge.svelte';
+	import EventTypeBadge from '$lib/components/EventTypeBadge.svelte';
 	import OccurrenceChart from '$lib/components/OccurrenceChart.svelte';
 	import { formatRelativeTime } from '$lib/utils/time';
 	import type { IssueAiSummary } from '$lib/server/ai';
@@ -22,6 +23,7 @@
 	<div class="rounded-xl border border-neutral-200 bg-white p-6">
 		<div class="flex flex-wrap items-center gap-2">
 			<SeverityBadge severity={data.issue.currentSeverity} />
+			<EventTypeBadge eventType={data.issue.eventType} />
 			{#if data.issue.displayStatus === 'resolved'}
 				<span class="text-xs font-medium text-emerald-600">Resolved</span>
 			{:else if data.trend === 'increasing'}

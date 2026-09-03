@@ -26,6 +26,7 @@
 - Event ingestion endpoint, message normalization/fingerprinting, deduped grouping into Issues
 - Deterministic MVP severity scoring (README section 21 rules)
 - Issues list + issue detail UI with progressive disclosure ("View Technical Details")
+- Event-type tags (e.g. "PHP Warning", "404 Not Found", "Failed Login") shown next to severity on every issue card, with clickable filter pills on the Issues list to narrow down by tag (`src/lib/utils/event-labels.ts`, `EventTypeBadge.svelte`)
 - Plugin captures real PHP errors/warnings/notices (`set_error_handler` + shutdown handler for fatals), with in-request dedup + cross-request throttling so it can't flood the site or the ingestion endpoint
 
 **Phase 1C — Useful Monitoring: 🟡 Mostly complete**

@@ -1,9 +1,25 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import SeverityBadge from '$lib/components/SeverityBadge.svelte';
+	import EventTypeBadge from '$lib/components/EventTypeBadge.svelte';
 	import { formatRelativeTime } from '$lib/utils/time';
+	import { getEventTypeLabel } from '$lib/utils/event-labels';
 
 	let { data }: { data: PageData } = $props();
+
+	let selectedType = $state<string>('all');
+
+	let typeCounts = $derived.by(() => {
+		const counts = new Map<string, number>();
+		for (const issue of data.issues) {
+			counts.set(issue.eventType, (counts.get(issue.eventType) ?? 0) + 1);
+		}
+		return counts;
+	});
+
+	let filteredIssues = $derived(
+		selectedType === 'all' ? data.issues : data.issues.filter((issue) => issue.eventType === selectedType)
+	);
 </script>
 
 <svelte:head>
@@ -18,12 +34,42 @@
 		</p>
 	</div>
 {:else}
+	<div class="mb-4 flex flex-wrap gap-2">
+		<button
+			type="button"
+			onclick={() => (selectedType = 'all')}
+			class="rounded-full px-3 py-1 text-xs font-medium {selectedType === 'all'
+				? 'bg-neutral-900 text-white'
+				: 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}"
+		>
+			All ({data.issues.length})
+		</button>
+		{#each [...typeCounts.entries()] as [eventType, count] (eventType)}
+			<button
+				type="button"
+				onclick={() => (selectedType = eventType)}
+				class="rounded-full px-3 py-1 text-xs font-medium {selectedType === eventType
+					? 'bg-neutral-900 text-white'
+					: 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}"
+			>
+				{getEventTypeLabel(eventType)} ({count})
+			</button>
+		{/each}
+	</div>
+
+	{#if filteredIssues.length === 0}
+		<div class="rounded-xl border border-dashed border-neutral-300 bg-white px-6 py-16 text-center">
+			<h2 class="text-base font-medium text-neutral-900">No issues match this filter</h2>
+		</div>
+	{/if}
+
 	<ul class="flex flex-col gap-3">
-		{#each data.issues as issue (issue.id)}
+		{#each filteredIssues as issue (issue.id)}
 			<li class="rounded-xl border border-neutral-200 bg-white px-5 py-4 {issue.displayStatus === 'resolved' ? 'opacity-60' : ''}">
 				<a href="/sites/{data.site.id}/issues/{issue.id}" class="flex flex-col gap-2">
 					<div class="flex flex-wrap items-center gap-2">
 						<SeverityBadge severity={issue.currentSeverity} />
+						<EventTypeBadge eventType={issue.eventType} />
 						{#if issue.displayStatus === 'resolved'}
 							<span class="text-xs font-medium text-emerald-600">Resolved</span>
 						{/if}
