@@ -118,10 +118,14 @@ class AndyBZ_Monitor_Change_Tracker {
 			array(
 				'eventType' => 'failed_login',
 				'category'  => 'security',
-				// Deliberately excludes the attempted username - it may
-				// actually be a mistyped password (a common user mistake),
-				// so it must never be transmitted.
 				'message'   => 'A failed login attempt was detected',
+				'metadata'  => array(
+					// Capped length - a login "username" field is sometimes
+					// where a mistyped password ends up, so keep this short
+					// and let the server's sanitizer be the second layer of defense.
+					'username'  => mb_substr( sanitize_text_field( $username ), 0, 190 ),
+					'ipAddress' => AndyBZ_Monitor_Event_Client::current_client_ip(),
+				),
 			)
 		);
 	}

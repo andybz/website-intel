@@ -9,6 +9,7 @@
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let aiSummary = $derived(data.issue.aiSummary as IssueAiSummary | null);
+	let metadata = $derived(data.issue.metadata as { username?: string; ipAddress?: string } | null);
 </script>
 
 <svelte:head>
@@ -147,6 +148,18 @@
 				<div>
 					<dt class="text-neutral-500">Request path</dt>
 					<dd class="font-mono break-all text-neutral-900">{data.issue.requestUrl}</dd>
+				</div>
+			{/if}
+			{#if metadata?.username}
+				<div>
+					<dt class="text-neutral-500">Last attempted username</dt>
+					<dd class="font-mono break-all text-neutral-900">{metadata.username}</dd>
+				</div>
+			{/if}
+			{#if metadata?.ipAddress}
+				<div>
+					<dt class="text-neutral-500">Last attempted from IP</dt>
+					<dd class="font-mono break-all text-neutral-900">{metadata.ipAddress}</dd>
 				</div>
 			{/if}
 			{#if data.issue.stackTrace}

@@ -118,9 +118,11 @@ export const POST: RequestHandler = async ({ request, params }) => {
 				updatedAt: now,
 				status: 'open',
 				notifiedAt: wasResolved ? null : sql`${issues.notifiedAt}`,
-				// Keep the most recent technical details for debugging context.
+				// Keep the most recent technical details for debugging context
+				// (e.g. the latest attempted username/IP for a failed_login issue).
 				stackTrace: data.stackTrace ?? sql`${issues.stackTrace}`,
-				requestUrl: data.requestUrl ? sanitizeRequestUrl(data.requestUrl) : sql`${issues.requestUrl}`
+				requestUrl: data.requestUrl ? sanitizeRequestUrl(data.requestUrl) : sql`${issues.requestUrl}`,
+				metadata: data.metadata ? sanitizeMetadata(data.metadata) : sql`${issues.metadata}`
 			})
 			.where(eq(issues.id, existing.id))
 			.returning();

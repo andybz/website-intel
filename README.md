@@ -31,7 +31,7 @@
 
 **Phase 1C — Useful Monitoring: 🟡 Mostly complete**
 - WordPress change tracking (plugin/theme/core updates, activations/deactivations) → new Activity tab, separate from the grouped Issues pipeline (these are discrete one-off facts, not recurring problems)
-- Failed login monitoring (security event; deliberately never captures the attempted username, since it may actually be a mistyped password)
+- Failed login monitoring (security event) — now also logs the attempted username and source IP address (per explicit user request), keeping only the MOST RECENT attempt's details per grouped issue (not a full history), still passed through the same sanitization pipeline as all other metadata
 - Basic HTTP 404 tracking (grouped per-URL)
 - ⚠️ **NOT built yet — do not forget:** basic bot vs. human traffic classification and the "Real Visitors / Bots %" dashboard stats described in sections 15 and 26. This needs a new pageview-aggregation data model (hourly/daily rollups per section 54), which is a meaningfully separate feature from the error/change event pipeline built so far. Revisit this before considering Phase 1C fully done.
 

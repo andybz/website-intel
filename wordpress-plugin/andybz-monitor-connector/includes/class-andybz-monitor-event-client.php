@@ -53,4 +53,16 @@ class AndyBZ_Monitor_Event_Client {
 		}
 		return strtok( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), '?' );
 	}
+
+	/**
+	 * Best-effort client IP. Uses REMOTE_ADDR only (the actual TCP peer) -
+	 * not X-Forwarded-For/etc., since those are trivially spoofable unless
+	 * the site is known to sit behind a trusted proxy, which we can't assume.
+	 */
+	public static function current_client_ip() {
+		if ( ! isset( $_SERVER['REMOTE_ADDR'] ) ) {
+			return null;
+		}
+		return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+	}
 }
