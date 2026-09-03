@@ -7,20 +7,24 @@
 </script>
 
 <div class="min-h-screen bg-neutral-50">
-	<header class="border-b border-neutral-200 bg-white">
+	<header class="bg-brand-navy relative border-b border-white/10" style="background-color: var(--color-brand-navy)">
+		<div
+			class="pointer-events-none absolute inset-0 opacity-40"
+			style="background-image: linear-gradient(90deg, transparent, var(--color-brand-blue), var(--color-brand-teal), transparent); height: 1px; top: auto; bottom: 0;"
+		></div>
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-			<a href="/" class="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+			<a href="/" class="flex items-center gap-2 text-sm font-semibold text-white">
 				<img src={logo} alt="" class="h-6 w-6" />
-				CauseTrail
+				<span class="tracking-tight">CauseTrail</span>
 			</a>
 
 			<div class="flex items-center gap-3">
-				<a href="/settings" class="text-sm text-neutral-500 hover:text-neutral-700">Settings</a>
-				<span class="hidden text-sm text-neutral-500 sm:inline">{data.user?.email}</span>
+				<a href="/settings" class="text-sm text-white/60 transition hover:text-white">Settings</a>
+				<span class="hidden text-sm text-white/60 sm:inline">{data.user?.email}</span>
 				<form method="POST" action="/logout">
 					<button
 						type="submit"
-						class="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+						class="rounded-md border border-white/15 px-3 py-1.5 text-sm font-medium text-white/80 hover:bg-white/10"
 					>
 						Sign out
 					</button>

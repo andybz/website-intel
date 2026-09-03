@@ -18,10 +18,7 @@
 			Generate a pairing key to install and connect the Monitor Connector plugin on this website.
 		</p>
 		<form method="POST" class="mt-4">
-			<button
-				type="submit"
-				class="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
-			>
+			<button type="submit" class="btn-primary">
 				Generate Connection Key
 			</button>
 		</form>

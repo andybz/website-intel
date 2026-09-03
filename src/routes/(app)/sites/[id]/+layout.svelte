@@ -21,7 +21,7 @@
 
 		<div class="mt-3 flex items-center justify-between gap-4">
 			<div class="flex items-center gap-3">
-				<h1 class="text-2xl font-semibold text-neutral-900">{data.site.name}</h1>
+				<h1 class="text-2xl font-bold tracking-tight text-neutral-900">{data.site.name}</h1>
 				<StatusBadge status={data.site.status} />
 			</div>
 			<a
@@ -38,9 +38,12 @@
 		{#each tabs as tab (tab.href)}
 			<a
 				href={tab.href}
-				class="shrink-0 px-3 py-2 text-sm font-medium {page.url.pathname === tab.href
-					? 'border-b-2 border-neutral-900 text-neutral-900'
-					: 'text-neutral-500 hover:text-neutral-700'}"
+				class="shrink-0 border-b-2 px-3 py-2 text-sm font-medium transition {page.url.pathname === tab.href
+					? 'text-neutral-900'
+					: 'border-transparent text-neutral-500 hover:text-neutral-700'}"
+				style={page.url.pathname === tab.href
+					? 'border-image: linear-gradient(90deg, var(--color-brand-blue), var(--color-brand-teal)) 1'
+					: ''}
 			>
 				{tab.label}
 			</a>

@@ -4,6 +4,7 @@
 	import SeverityBadge from '$lib/components/SeverityBadge.svelte';
 	import EventTypeBadge from '$lib/components/EventTypeBadge.svelte';
 	import StatCard from '$lib/components/StatCard.svelte';
+	import HealthRing from '$lib/components/HealthRing.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -66,10 +67,7 @@
 					value={form?.question ?? ''}
 					class="flex-1 rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
 				/>
-				<button
-					type="submit"
-					class="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
-				>
+				<button type="submit" class="btn-primary">
 					Ask
 				</button>
 			</form>
@@ -87,15 +85,14 @@
 	{/if}
 
 	{#if data.site.status !== 'pending'}
-		<div class="rounded-xl border border-neutral-200 bg-white px-6 py-5">
-			<p class="text-sm text-neutral-500">Website Health</p>
-			<p class="mt-1 flex items-baseline gap-2">
-				<span class="text-4xl font-semibold text-neutral-900">{data.health.score}</span>
-				<span class="text-lg font-medium text-neutral-400">{data.health.grade}</span>
-			</p>
-			<p class="mt-1 text-sm font-medium {healthColor[data.health.status]}">
-				{healthCopy[data.health.status]}
-			</p>
+		<div class="flex items-center gap-5 rounded-xl border border-neutral-200 bg-white px-6 py-5">
+			<HealthRing score={data.health.score} grade={data.health.grade} status={data.health.status} size="lg" />
+			<div>
+				<p class="text-sm text-neutral-500">Website Health</p>
+				<p class="mt-1 text-sm font-medium {healthColor[data.health.status]}">
+					{healthCopy[data.health.status]}
+				</p>
+			</div>
 		</div>
 	{/if}
 

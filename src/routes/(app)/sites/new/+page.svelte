@@ -52,10 +52,7 @@
 					<p class="text-sm text-red-600">{form.error}</p>
 				{/if}
 
-				<button
-					type="submit"
-					class="mt-2 rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-700"
-				>
+				<button type="submit" class="btn-primary mt-2">
 					Create Connection
 				</button>
 			</form>

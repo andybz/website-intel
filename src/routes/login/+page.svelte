@@ -9,11 +9,11 @@
 	<title>Sign in — CauseTrail</title>
 </svelte:head>
 
-<div class="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
-	<div class="w-full max-w-sm rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
-		<div class="flex items-center gap-2">
-			<img src={logo} alt="" class="h-7 w-7" />
-			<h1 class="text-xl font-semibold text-neutral-900">CauseTrail</h1>
+<div class="brand-glow-backdrop flex min-h-screen items-center justify-center px-4">
+	<div class="w-full max-w-sm rounded-2xl border border-white/10 bg-white p-8 shadow-2xl shadow-black/40">
+		<div class="flex items-center gap-2.5">
+			<img src={logo} alt="" class="h-9 w-9" />
+			<h1 class="text-2xl font-bold tracking-tight text-neutral-900">CauseTrail</h1>
 		</div>
 		<p class="mt-1 text-sm text-neutral-500">Sign in to your dashboard.</p>
 
@@ -27,7 +27,8 @@
 					autocomplete="username"
 					required
 					value={form?.email ?? ''}
-					class="rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
+					class="rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand-blue focus:outline-none"
+					style="--tw-ring-color: var(--color-brand-blue)"
 				/>
 			</div>
 
@@ -39,7 +40,7 @@
 					type="password"
 					autocomplete="current-password"
 					required
-					class="rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
+					class="rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand-blue focus:outline-none"
 				/>
 			</div>
 
@@ -47,12 +48,7 @@
 				<p class="text-sm text-red-600">{form.error}</p>
 			{/if}
 
-			<button
-				type="submit"
-				class="mt-2 rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-700"
-			>
-				Sign in
-			</button>
+			<button type="submit" class="btn-primary mt-2 w-full">Sign in</button>
 
 			<a href="/forgot-password" class="text-center text-sm text-neutral-500 hover:text-neutral-700">
 				Forgot password?

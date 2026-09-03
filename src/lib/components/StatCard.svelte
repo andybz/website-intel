@@ -18,7 +18,10 @@
 	};
 </script>
 
-<div class="rounded-xl border border-neutral-200 bg-white px-5 py-4">
+<div class="relative overflow-hidden rounded-xl border border-neutral-200 bg-white px-5 py-4">
+	{#if tone === 'neutral' || tone === 'green'}
+		<div class="brand-gradient-bg absolute inset-x-0 top-0 h-0.5"></div>
+	{/if}
 	<p class="text-sm text-neutral-500">{label}</p>
 	<p class="mt-1 text-2xl font-semibold {toneClasses[tone]}">{value}</p>
 </div>

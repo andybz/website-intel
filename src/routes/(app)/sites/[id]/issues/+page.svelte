@@ -38,8 +38,8 @@
 		<button
 			type="button"
 			onclick={() => (selectedType = 'all')}
-			class="rounded-full px-3 py-1 text-xs font-medium {selectedType === 'all'
-				? 'bg-neutral-900 text-white'
+			class="rounded-full px-3 py-1 text-xs font-medium transition {selectedType === 'all'
+				? 'brand-gradient-bg text-white'
 				: 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}"
 		>
 			All ({data.issues.length})
@@ -48,8 +48,8 @@
 			<button
 				type="button"
 				onclick={() => (selectedType = eventType)}
-				class="rounded-full px-3 py-1 text-xs font-medium {selectedType === eventType
-					? 'bg-neutral-900 text-white'
+				class="rounded-full px-3 py-1 text-xs font-medium transition {selectedType === eventType
+					? 'brand-gradient-bg text-white'
 					: 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}"
 			>
 				{getEventTypeLabel(eventType)} ({count})

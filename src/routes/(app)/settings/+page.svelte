@@ -66,10 +66,7 @@
 				<p class="text-sm text-emerald-600">Password updated.</p>
 			{/if}
 
-			<button
-				type="submit"
-				class="mt-2 self-start rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
-			>
+			<button type="submit" class="btn-primary mt-2 self-start">
 				Update Password
 			</button>
 		</form>
@@ -181,10 +178,7 @@
 					<p class="text-sm text-emerald-600">User added.</p>
 				{/if}
 
-				<button
-					type="submit"
-					class="self-start rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
-				>
+				<button type="submit" class="btn-primary self-start">
 					Add User
 				</button>
 			</form>

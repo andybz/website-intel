@@ -8,9 +8,9 @@
 	<title>Reset password — CauseTrail</title>
 </svelte:head>
 
-<div class="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
-	<div class="w-full max-w-sm rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
-		<h1 class="text-xl font-semibold text-neutral-900">Set a new password</h1>
+<div class="brand-glow-backdrop flex min-h-screen items-center justify-center px-4">
+	<div class="w-full max-w-sm rounded-2xl border border-white/10 bg-white p-8 shadow-2xl shadow-black/40">
+		<h1 class="text-xl font-bold tracking-tight text-neutral-900">Set a new password</h1>
 
 		{#if !data.valid}
 			<p class="mt-4 text-sm text-red-600">
@@ -53,12 +53,7 @@
 					<p class="text-sm text-red-600">{form.error}</p>
 				{/if}
 
-				<button
-					type="submit"
-					class="mt-2 rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-700"
-				>
-					Reset Password
-				</button>
+				<button type="submit" class="btn-primary mt-2 w-full">Reset Password</button>
 			</form>
 		{/if}
 	</div>

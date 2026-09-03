@@ -139,10 +139,7 @@
 				what to do next.
 			</p>
 			<form method="POST" action="?/generateSummary" class="mt-4">
-				<button
-					type="submit"
-					class="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
-				>
+				<button type="submit" class="btn-primary">
 					Get AI Explanation
 				</button>
 			</form>

@@ -13,7 +13,8 @@
 	</ol>
 
 	<p
-		class="mt-3 select-all rounded-md bg-neutral-900 px-4 py-3 text-center font-mono text-base tracking-wide text-white"
+		class="mt-3 select-all rounded-md px-4 py-3 text-center font-mono text-base tracking-wide text-white"
+		style="background-color: var(--color-brand-navy)"
 	>
 		{token}
 	</p>
@@ -26,10 +27,7 @@
 		<li>4. Click Connect.</li>
 	</ol>
 
-	<a
-		href="/"
-		class="mt-6 inline-flex items-center rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
-	>
+	<a href="/" class="btn-primary mt-6">
 		Done
 	</a>
 </div>
