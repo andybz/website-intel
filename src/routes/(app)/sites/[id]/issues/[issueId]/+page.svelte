@@ -110,20 +110,14 @@
 		{#if aiSummary}
 			<dl class="mt-4 flex flex-col gap-4 text-sm">
 				<div>
-					<dt class="font-medium text-neutral-700">What Happened</dt>
-					<dd class="mt-1 text-neutral-600">{aiSummary.whatHappened}</dd>
+					<dt class="font-medium text-neutral-700">What This Means</dt>
+					<dd class="mt-1 text-neutral-600">{aiSummary.summary}</dd>
 				</div>
 				<div>
-					<dt class="font-medium text-neutral-700">Who Is Affected</dt>
-					<dd class="mt-1 text-neutral-600">{aiSummary.whoIsAffected}</dd>
-				</div>
-				<div>
-					<dt class="font-medium text-neutral-700">Likely Cause</dt>
-					<dd class="mt-1 text-neutral-600">{aiSummary.likelyCause}</dd>
-				</div>
-				<div>
-					<dt class="font-medium text-neutral-700">Recommended Action</dt>
-					<dd class="mt-1 text-neutral-600">{aiSummary.recommendedAction}</dd>
+					<dt class="font-medium text-neutral-700">Technical Fix (for developers)</dt>
+					<dd class="mt-1 overflow-x-auto rounded-md bg-neutral-900 p-3 font-mono text-xs text-neutral-100">
+						<pre class="whitespace-pre-wrap">{aiSummary.technicalFix}</pre>
+					</dd>
 				</div>
 			</dl>
 			<form method="POST" action="?/generateSummary" class="mt-4">
@@ -136,8 +130,8 @@
 			</form>
 		{:else}
 			<p class="mt-1 text-sm text-neutral-500">
-				Get a plain-English explanation of what happened, who's affected, the likely cause, and
-				what to do next.
+				Get a plain-English explanation of what this issue means, plus a technical fix with the
+				problem file and suggested code, for whoever handles development.
 			</p>
 			<form method="POST" action="?/generateSummary" class="mt-4">
 				<button type="submit" class="btn-primary">

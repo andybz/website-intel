@@ -2,22 +2,35 @@ import { env } from '$env/dynamic/private';
 import type { Issue, Site } from '$db/schema';
 
 export type IssueAiSummary = {
-	whatHappened: string;
-	whoIsAffected: string;
-	likelyCause: string;
-	recommendedAction: string;
+	summary: string;
+	technicalFix: string;
 };
 
 const MODEL = 'gpt-4o-mini';
 
-const SYSTEM_PROMPT = `You are a website health analyst for a monitoring tool. You explain technical
-website errors in plain, calm English for a non-technical website owner, then add a short technical
-note. You are given structured data about one grouped issue (an error/problem that occurred one or
-more times on a WordPress website). Respond with ONLY a JSON object with these exact keys:
-"whatHappened" (1-2 plain-English sentences), "whoIsAffected" (1 sentence about visitor/business
-impact, or say impact is unclear if you can't tell), "likelyCause" (1-2 sentences, be honest if
-uncertain), "recommendedAction" (1-2 sentences, concrete and actionable). Never invent specifics you
-cannot infer from the provided data. Do not use markdown formatting.`;
+const SYSTEM_PROMPT = `You are a website health analyst for a monitoring tool. You are given
+structured data about one grouped issue (an error/problem that occurred one or more times on a
+WordPress website). Respond with ONLY a JSON object with exactly these two keys:
+"summary": 2-3 plain-English sentences for a non-technical website owner, explaining what this issue
+means in everyday terms and whether it likely affects visitors. No jargon, no file paths, no code.
+"technicalFix": a developer-facing explanation, written as if you were a senior developer helping a
+teammate fix this exact issue. Identify the likely root cause, then ALWAYS end with the actual
+corrected code inline in this same string - never just describe or promise a fix without showing it.
+This field is already displayed in a monospace code block in the UI, so do NOT wrap code in markdown
+triple-backtick fences - just write it plainly, on its own lines after the prose. Only if a file/line
+is NOT provided and you truly cannot infer where the problem is, say so honestly and suggest what to
+check next instead of inventing a file. Never invent facts (file contents, plugin names, etc.) you
+cannot infer from the provided data.
+
+Example of a correctly-formatted "technicalFix" value (yours will differ based on the actual issue):
+"The undefined array key warning means the code reads $data['user_id'] without first confirming that
+key exists. Update wp-content/themes/example/functions.php around line 88 to guard the access:
+
+if (isset($data['user_id'])) {
+    $user_id = $data['user_id'];
+} else {
+    $user_id = 0;
+}"`;
 
 export async function generateIssueSummary(issue: Issue, site: Site): Promise<IssueAiSummary> {
 	if (!env.OPENAI_API_KEY) {
@@ -48,6 +61,8 @@ export async function generateIssueSummary(issue: Issue, site: Site): Promise<Is
 		body: JSON.stringify({
 			model: MODEL,
 			response_format: { type: 'json_object' },
+			// Enough headroom for a full explanation plus an inline code fix without truncating mid-answer.
+			max_tokens: 900,
 			messages: [
 				{ role: 'system', content: SYSTEM_PROMPT },
 				{ role: 'user', content: JSON.stringify(facts) }
@@ -68,9 +83,7 @@ export async function generateIssueSummary(issue: Issue, site: Site): Promise<Is
 
 	const parsed = JSON.parse(content);
 	return {
-		whatHappened: String(parsed.whatHappened ?? ''),
-		whoIsAffected: String(parsed.whoIsAffected ?? ''),
-		likelyCause: String(parsed.likelyCause ?? ''),
-		recommendedAction: String(parsed.recommendedAction ?? '')
+		summary: String(parsed.summary ?? ''),
+		technicalFix: String(parsed.technicalFix ?? '')
 	};
 }
