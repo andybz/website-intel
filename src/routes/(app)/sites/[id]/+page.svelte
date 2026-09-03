@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import { formatRelativeTime, isHeartbeatStale } from '$lib/utils/time';
 	import SeverityBadge from '$lib/components/SeverityBadge.svelte';
 	import EventTypeBadge from '$lib/components/EventTypeBadge.svelte';
 	import StatCard from '$lib/components/StatCard.svelte';
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let stale = $derived(
 		data.site.status === 'connected' && isHeartbeatStale(data.site.lastHeartbeatAt)
@@ -50,6 +50,39 @@
 				No heartbeat received recently. The website may be offline, or its cron/heartbeat process
 				may have stopped.
 			</p>
+		</div>
+	{/if}
+
+	{#if data.site.status === 'connected'}
+		<div class="rounded-xl border border-neutral-200 bg-white p-6">
+			<h2 class="text-base font-medium text-neutral-900">Ask about this website</h2>
+			<form method="POST" action="?/ask" class="mt-3 flex flex-col gap-2 sm:flex-row">
+				<input
+					type="text"
+					name="question"
+					required
+					maxlength="300"
+					placeholder="e.g. What changed this week?"
+					value={form?.question ?? ''}
+					class="flex-1 rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
+				/>
+				<button
+					type="submit"
+					class="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
+				>
+					Ask
+				</button>
+			</form>
+
+			{#if form?.error}
+				<p class="mt-3 text-sm text-red-600">{form.error}</p>
+			{/if}
+			{#if form?.answer}
+				<div class="mt-4 rounded-lg bg-neutral-50 p-4">
+					<p class="text-sm font-medium text-neutral-500">"{form.question}"</p>
+					<p class="mt-1 text-sm text-neutral-800">{form.answer}</p>
+				</div>
+			{/if}
 		</div>
 	{/if}
 
