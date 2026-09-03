@@ -71,6 +71,9 @@
 					Ask
 				</button>
 			</form>
+			<p class="mt-2 text-xs text-neutral-400">
+				Tip: reference an issue by its #ID (shown next to each issue below) for a more specific answer.
+			</p>
 
 			{#if form?.error}
 				<p class="mt-3 text-sm text-red-600">{form.error}</p>
@@ -155,6 +158,7 @@
 				<li class="rounded-xl border border-neutral-200 bg-white px-5 py-4">
 					<a href="/sites/{data.site.id}/issues/{issue.id}" class="flex flex-col gap-2">
 						<div class="flex flex-wrap items-center gap-2">
+							<span class="font-mono text-xs text-neutral-400">#{issue.id}</span>
 							<SeverityBadge severity={issue.currentSeverity} />
 							<EventTypeBadge eventType={issue.eventType} />
 						</div>

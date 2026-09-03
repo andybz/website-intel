@@ -120,6 +120,7 @@
 									href="/sites/{site.id}/issues/{site.latestIssue.id}"
 									class="mt-2 flex items-center gap-2 hover:underline"
 								>
+									<span class="font-mono text-xs text-neutral-400">#{site.latestIssue.id}</span>
 									<SeverityBadge severity={site.latestIssue.currentSeverity} />
 									<span class="break-words text-sm text-neutral-700">{site.latestIssue.message}</span>
 								</a>

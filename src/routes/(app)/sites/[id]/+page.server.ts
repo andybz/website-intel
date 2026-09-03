@@ -134,6 +134,7 @@ export const actions: Actions = {
 		const context = {
 			site: { name: site.name, url: site.url, status: site.status, healthScore: health.score, healthGrade: health.grade },
 			openIssues: openIssues.map((issue) => ({
+				id: issue.id,
 				message: issue.message,
 				eventType: issue.eventType,
 				severity: issue.currentSeverity,

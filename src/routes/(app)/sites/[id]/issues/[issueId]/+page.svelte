@@ -34,6 +34,7 @@
 
 	<div class="rounded-xl border border-neutral-200 bg-white p-6">
 		<div class="flex flex-wrap items-center gap-2">
+			<span class="font-mono text-xs text-neutral-400">#{data.issue.id}</span>
 			<SeverityBadge severity={data.issue.currentSeverity} />
 			<EventTypeBadge eventType={data.issue.eventType} />
 			{#if data.issue.displayStatus === 'resolved'}

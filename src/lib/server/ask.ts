@@ -11,11 +11,14 @@ questions about ONE specific monitored website using ONLY the structured data pr
 never invent facts, numbers, or events that aren't present in that data. If the data doesn't contain
 enough information to answer confidently, say so plainly rather than guessing. Keep answers concise
 (2-4 sentences), plain English, no markdown formatting. You are not able to take any action on the
-website - only observe and explain.`;
+website - only observe and explain. Each issue has a numeric "id" shown to the user as "#123" next to
+it in the dashboard - if the question references an issue by that number (e.g. "issue #123" or just
+"123"), match it against that id field rather than guessing from the message text.`;
 
 export type AskWebsiteContext = {
 	site: { name: string; url: string; status: string; healthScore: number; healthGrade: string };
 	openIssues: {
+		id: number;
 		message: string;
 		eventType: string;
 		severity: number;

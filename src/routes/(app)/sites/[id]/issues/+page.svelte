@@ -68,6 +68,7 @@
 			<li class="rounded-xl border border-neutral-200 bg-white px-5 py-4 {issue.displayStatus === 'resolved' ? 'opacity-60' : ''}">
 				<a href="/sites/{data.site.id}/issues/{issue.id}" class="flex flex-col gap-2">
 					<div class="flex flex-wrap items-center gap-2">
+						<span class="font-mono text-xs text-neutral-400">#{issue.id}</span>
 						<SeverityBadge severity={issue.currentSeverity} />
 						<EventTypeBadge eventType={issue.eventType} />
 						{#if issue.displayStatus === 'resolved'}
