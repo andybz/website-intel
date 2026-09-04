@@ -58,12 +58,14 @@
 				This website hasn't connected yet. Install the Monitor Connector plugin and enter the
 				pairing key to get started.
 			</p>
-			<a
-				href="/sites/{data.site.id}/connect"
-				class="mt-3 inline-flex items-center rounded-md border border-amber-300 bg-white px-3 py-1.5 text-sm font-medium text-amber-800 hover:bg-amber-100"
-			>
-				View setup instructions
-			</a>
+			{#if data.user?.role === 'admin'}
+				<a
+					href="/sites/{data.site.id}/connect"
+					class="mt-3 inline-flex items-center rounded-md border border-amber-300 bg-white px-3 py-1.5 text-sm font-medium text-amber-800 hover:bg-amber-100"
+				>
+					View setup instructions
+				</a>
+			{/if}
 		</div>
 	{:else if stale}
 		<div class="rounded-xl border border-red-200 bg-red-50 px-5 py-4">

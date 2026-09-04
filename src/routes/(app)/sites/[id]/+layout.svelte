@@ -24,12 +24,14 @@
 				<h1 class="text-2xl font-bold tracking-tight text-white">{data.site.name}</h1>
 				<StatusBadge status={data.site.status} />
 			</div>
-			<a
-				href="/sites/{data.site.id}/edit"
-				class="rounded-md border border-white/15 px-3 py-1.5 text-sm font-medium text-white/80 hover:bg-white/10"
-			>
-				Edit
-			</a>
+			{#if data.user?.role === 'admin'}
+				<a
+					href="/sites/{data.site.id}/edit"
+					class="rounded-md border border-white/15 px-3 py-1.5 text-sm font-medium text-white/80 hover:bg-white/10"
+				>
+					Edit
+				</a>
+			{/if}
 		</div>
 		<p class="text-sm text-white/60">{data.site.url}</p>
 	</div>

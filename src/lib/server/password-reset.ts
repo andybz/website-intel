@@ -13,12 +13,12 @@ function hashResetToken(token: string): string {
 	return createHash('sha256').update(token).digest('hex');
 }
 
-export async function createPasswordResetToken(userId: number) {
+export async function createPasswordResetToken(userId: number, ttlMs: number = RESET_TOKEN_TTL_MS) {
 	const token = generatePasswordResetToken();
 	await db.insert(passwordResetTokens).values({
 		userId,
 		tokenHash: hashResetToken(token),
-		expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS)
+		expiresAt: new Date(Date.now() + ttlMs)
 	});
 	return token;
 }

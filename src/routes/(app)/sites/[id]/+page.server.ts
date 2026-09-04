@@ -7,6 +7,7 @@ import { computeCurrentSeverity } from '$lib/server/severity';
 import { computeSiteHealth } from '$lib/server/health';
 import { answerWebsiteQuestion } from '$lib/server/ask';
 import { isRateLimited, recordAttempt } from '$lib/server/auth';
+import { canAccessSite } from '$lib/server/access';
 
 const TRAFFIC_WINDOW_MS = 1000 * 60 * 60 * 24;
 const TREND_DAYS = 7;
@@ -104,6 +105,9 @@ export const actions: Actions = {
 	ask: async ({ request, params, locals }) => {
 		if (!locals.user) return fail(401, { error: 'Not signed in.' });
 
+		const siteId = Number(params.id);
+		if (!(await canAccessSite(locals.user, siteId))) return fail(403, { error: 'Not authorized.' });
+
 		const rateLimitKey = `ask:${locals.user.id}`;
 		if (isRateLimited(rateLimitKey)) {
 			return fail(429, { error: 'Too many questions. Try again in a few minutes.' });
@@ -115,7 +119,6 @@ export const actions: Actions = {
 			return fail(400, { error: 'Ask a question up to 300 characters.' });
 		}
 
-		const siteId = Number(params.id);
 		const [site] = await db.select().from(sites).where(eq(sites.id, siteId));
 		if (!site) return fail(404, { error: 'Website not found.' });
 

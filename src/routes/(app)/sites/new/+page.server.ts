@@ -1,4 +1,5 @@
-import { fail, type Actions } from '@sveltejs/kit';
+import { error, fail, type Actions } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { sites } from '$db/schema';
 import { createPairingToken } from '$lib/server/pairing';
@@ -13,8 +14,14 @@ function normalizeUrl(input: string): URL | null {
 	}
 }
 
+export const load: PageServerLoad = async ({ locals }) => {
+	if (locals.user?.role !== 'admin') error(404, 'Not found');
+};
+
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, locals }) => {
+		if (locals.user?.role !== 'admin') return fail(403, { error: 'Not authorized.', name: '', url: '' });
+
 		const data = await request.formData();
 		const name = String(data.get('name') ?? '').trim();
 		const rawUrl = String(data.get('url') ?? '').trim();

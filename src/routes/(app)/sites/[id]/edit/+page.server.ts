@@ -14,13 +14,16 @@ function normalizeUrl(input: string): URL | null {
 	}
 }
 
-export const load: PageServerLoad = async ({ parent }) => {
+export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { site } = await parent();
+	if (locals.user?.role !== 'admin') error(403, 'Not authorized.');
 	return { site };
 };
 
 export const actions: Actions = {
-	default: async ({ request, params }) => {
+	default: async ({ request, params, locals }) => {
+		if (locals.user?.role !== 'admin') return fail(403, { error: 'Not authorized.', name: '', url: '' });
+
 		const siteId = Number(params.id);
 		if (!Number.isInteger(siteId)) error(404, 'Website not found');
 

@@ -64,6 +64,13 @@
       "when": 1788394964832,
       "tag": "0008_famous_smasher",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788534672209,
+      "tag": "0009_absurd_slayback",
+      "breakpoints": true
     }
   ]
 }

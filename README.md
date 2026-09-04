@@ -56,6 +56,14 @@
 - "Ask Your Website" (section 31): a real conversational Q&A box on the site Overview page ("Ask about this website..."). Grounded strictly in structured data gathered server-side (site health/grade, top 10 open issues with severity/occurrence data, last 10 activity entries, 7-day traffic breakdown) — the AI never sees raw metadata (IPs/usernames, stack traces) and is explicitly instructed to say when it doesn't have enough information rather than invent an answer (`src/lib/server/ask.ts`). Rate-limited per user (reuses the existing login/forgot-password rate limiter).
 - Not yet started: anomaly detection/historical baselines (needs weeks of accumulated data to be meaningful, given traffic/issue-hourly tracking is brand new), deeper security behavior analysis, advanced root-cause detection beyond the Phase 2 time-proximity correlation.
 
+**Multi-user roles & client access (2026-09-04):** Not part of the original phased spec, but requested directly — a lightweight, single-tenant-friendly way to give clients read-only visibility into their own site(s) without full agency/SaaS multi-tenancy (section 45, still explicitly deferred).
+- `users` gained `role` ('admin' | 'client', pg enum) and `name`; `password_hash` is now nullable (an invited user has none until they set one)
+- New `site_users` join table (many-to-many) grants a client access to specific sites; admins implicitly see everything
+- New `src/lib/server/access.ts` — `canAccessSite`/`accessibleSites` helpers, enforced in TWO places per protected route: the site layout's `load` (blocks viewing, 404s rather than 403s to avoid confirming a site ID exists) AND independently on every write action (SvelteKit actions don't re-run parent load, so each admin-only or site-scoped action re-checks itself)
+- Client role is strictly view-only: Overview/Issues/Activity/Traffic/WordPress/Ask Your Website/Get AI Explanation on their assigned sites only — no Settings/user management, no adding/editing/removing sites, no generating pairing keys, no "Mark as Resolved", no visibility into unassigned sites or other clients
+- Admin's "Add a user" flow now takes Name + Email + Role (+ site checklist for clients) instead of a typed password — reuses the existing password-reset-token + Resend email infrastructure to send a "set your password" invite link (7-day expiry; falls back to the normal "Forgot password?" flow if it lapses)
+- Settings page's Users list lets an admin change any client's site access at any time via a per-user checklist, independent of the invite step
+
 **Not started:** Phase 4 (server-level monitoring), Phase 5 (SaaS/agency features).
 
 ### Backlog — large items deferred for later review

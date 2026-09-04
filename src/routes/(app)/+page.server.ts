@@ -1,15 +1,16 @@
 import type { Actions, PageServerLoad } from './$types';
 import { eq, and, ne, gt } from 'drizzle-orm';
-import { redirect } from '@sveltejs/kit';
+import { redirect, fail } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { sites, issues } from '$db/schema';
 import { computeCurrentSeverity } from '$lib/server/severity';
 import { computeSiteHealth } from '$lib/server/health';
+import { accessibleSites } from '$lib/server/access';
 
 const OPEN_ISSUE_WINDOW_MS = 1000 * 60 * 30;
 
-export const load: PageServerLoad = async () => {
-	const allSites = await db.select().from(sites);
+export const load: PageServerLoad = async ({ locals }) => {
+	const allSites = await accessibleSites(locals.user!);
 
 	const openIssues = await db
 		.select({
@@ -64,7 +65,9 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	remove: async ({ request }) => {
+	remove: async ({ request, locals }) => {
+		if (locals.user?.role !== 'admin') return fail(403, { error: 'Not authorized.' });
+
 		const data = await request.formData();
 		const siteId = Number(data.get('siteId'));
 		if (Number.isInteger(siteId)) {

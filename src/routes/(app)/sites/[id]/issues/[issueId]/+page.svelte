@@ -68,7 +68,7 @@
 			<p class="mt-2 text-sm text-emerald-700">
 				No new occurrences have been detected recently.
 			</p>
-		{:else}
+		{:else if data.user?.role === 'admin'}
 			<form method="POST" action="?/resolve" class="mt-4">
 				<button
 					type="submit"

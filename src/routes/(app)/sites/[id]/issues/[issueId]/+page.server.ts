@@ -8,6 +8,7 @@ import { computeIssueStatus } from '$lib/utils/time';
 import { generateIssueSummary } from '$lib/server/ai';
 import { computeTrend } from '$lib/server/trend';
 import { findRelatedChange } from '$lib/server/correlation';
+import { canAccessSite } from '$lib/server/access';
 
 const CHART_HOURS = 48;
 const CORRELATION_WINDOW_MS = 1000 * 60 * 60;
@@ -69,12 +70,14 @@ export const load: PageServerLoad = async ({ parent, params }) => {
 };
 
 export const actions: Actions = {
-	generateSummary: async ({ params }) => {
+	generateSummary: async ({ params, locals }) => {
 		const issueId = Number(params.issueId);
 		if (!Number.isInteger(issueId)) return fail(404, { error: 'Issue not found.' });
 
 		const [issue] = await db.select().from(issues).where(eq(issues.id, issueId));
 		if (!issue) return fail(404, { error: 'Issue not found.' });
+
+		if (!(await canAccessSite(locals.user!, issue.siteId))) return fail(403, { error: 'Not authorized.' });
 
 		const [site] = await db.select().from(sites).where(eq(sites.id, issue.siteId));
 		if (!site) return fail(404, { error: 'Website not found.' });
@@ -96,7 +99,9 @@ export const actions: Actions = {
 	// Manual resolve - lets a user close an issue immediately instead of
 	// waiting for the 30-min no-occurrence auto-resolve window (time.ts).
 	// A new occurrence still flips it back to 'open' automatically.
-	resolve: async ({ params }) => {
+	resolve: async ({ params, locals }) => {
+		if (locals.user?.role !== 'admin') return fail(403, { error: 'Not authorized.' });
+
 		const issueId = Number(params.issueId);
 		if (!Number.isInteger(issueId)) return fail(404, { error: 'Issue not found.' });
 

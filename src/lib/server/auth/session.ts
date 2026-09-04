@@ -9,7 +9,7 @@ const SESSION_COOKIE_NAME = 'session';
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 const SESSION_RENEW_THRESHOLD_MS = 1000 * 60 * 60 * 24 * 15; // renew once under 15 days left
 
-export type SessionUser = Pick<User, 'id' | 'email'>;
+export type SessionUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
 
 export function generateSessionToken(): string {
 	return randomBytes(20).toString('base64url');
@@ -38,7 +38,7 @@ export async function validateSessionToken(
 	const [result] = await db
 		.select({
 			session: sessions,
-			user: { id: users.id, email: users.email }
+			user: { id: users.id, email: users.email, name: users.name, role: users.role }
 		})
 		.from(sessions)
 		.innerJoin(users, eq(sessions.userId, users.id))

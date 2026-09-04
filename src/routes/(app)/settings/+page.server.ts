@@ -1,8 +1,8 @@
 import { fail } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { users, sessions } from '$db/schema';
+import { users, sessions, sites, siteUsers } from '$db/schema';
 import {
 	hashPassword,
 	verifyPasswordHash,
@@ -13,46 +13,130 @@ import {
 	recordAttempt,
 	clearAttempts
 } from '$lib/server/auth';
+import { createPasswordResetToken } from '$lib/server/password-reset';
+import { sendEmail } from '$lib/server/email';
 
 const MIN_PASSWORD_LENGTH = 8;
+const INVITE_TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7; // a week - plenty of time to check email
 
-export const load: PageServerLoad = async () => {
-	const allUsers = await db
-		.select({ id: users.id, email: users.email, createdAt: users.createdAt })
-		.from(users)
-		.orderBy(users.createdAt);
+export const load: PageServerLoad = async ({ locals }) => {
+	const isAdmin = locals.user?.role === 'admin';
 
-	return { users: allUsers };
+	// Non-admins only ever see their own row (for "Change your password") -
+	// never the full user list or other clients' site assignments.
+	if (!isAdmin) {
+		return { users: [], allSites: [], isAdmin };
+	}
+
+	const [allUsers, allSites, allAssignments] = await Promise.all([
+		db
+			.select({ id: users.id, email: users.email, name: users.name, role: users.role, createdAt: users.createdAt })
+			.from(users)
+			.orderBy(users.createdAt),
+		db.select({ id: sites.id, name: sites.name }).from(sites).orderBy(sites.name),
+		db.select().from(siteUsers)
+	]);
+
+	const siteIdsByUser = new Map<number, number[]>();
+	for (const row of allAssignments) {
+		const list = siteIdsByUser.get(row.userId) ?? [];
+		list.push(row.siteId);
+		siteIdsByUser.set(row.userId, list);
+	}
+
+	const usersWithSites = allUsers.map((u) => ({ ...u, siteIds: siteIdsByUser.get(u.id) ?? [] }));
+
+	return { users: usersWithSites, allSites, isAdmin };
 };
 
 export const actions: Actions = {
-	addUser: async ({ request }) => {
+	addUser: async ({ request, locals, url }) => {
+		if (locals.user?.role !== 'admin') return fail(403, { form: 'addUser', error: 'Not authorized.', name: '', email: '' });
+
 		const data = await request.formData();
+		const name = String(data.get('name') ?? '').trim();
 		const email = String(data.get('email') ?? '')
 			.trim()
 			.toLowerCase();
-		const password = String(data.get('password') ?? '');
+		const role = data.get('role') === 'admin' ? 'admin' : 'client';
+		const siteIds = data
+			.getAll('siteIds')
+			.map((v) => Number(v))
+			.filter((n) => Number.isInteger(n));
 
-		if (!email || !password) {
-			return fail(400, { form: 'addUser', error: 'Email and password are required.', email });
-		}
-		if (password.length < MIN_PASSWORD_LENGTH) {
-			return fail(400, {
-				form: 'addUser',
-				error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
-				email
-			});
+		if (!name || !email) {
+			return fail(400, { form: 'addUser', error: 'Name and email are required.', name, email });
 		}
 
 		const [existing] = await db.select().from(users).where(eq(users.email, email));
 		if (existing) {
-			return fail(400, { form: 'addUser', error: 'A user with that email already exists.', email });
+			return fail(400, { form: 'addUser', error: 'A user with that email already exists.', name, email });
 		}
 
-		const passwordHash = await hashPassword(password);
-		await db.insert(users).values({ email, passwordHash });
+		if (role === 'client' && siteIds.length === 0) {
+			return fail(400, {
+				form: 'addUser',
+				error: 'Select at least one website this client can access.',
+				name,
+				email
+			});
+		}
+
+		const [user] = await db.insert(users).values({ name, email, role }).returning();
+
+		if (role === 'client' && siteIds.length > 0) {
+			await db.insert(siteUsers).values(siteIds.map((siteId) => ({ siteId, userId: user.id })));
+		}
+
+		const grantedSites =
+			role === 'client' && siteIds.length > 0
+				? await db.select({ name: sites.name }).from(sites).where(inArray(sites.id, siteIds))
+				: [];
+
+		const token = await createPasswordResetToken(user.id, INVITE_TOKEN_TTL_MS);
+		const setPasswordUrl = `${url.origin}/reset-password/${token}`;
+		const siteList = grantedSites.map((s) => s.name).join(', ');
+
+		try {
+			await sendEmail({
+				to: email,
+				subject: 'You’ve been added to CauseTrail',
+				text: `An account has been created for you on CauseTrail${siteList ? ` with access to: ${siteList}` : ''}.\n\nSet your password to get started: ${setPasswordUrl}\n\nThis link expires in 7 days. If it expires, use "Forgot password?" on the login page to get a new one.`,
+				html: `<p>An account has been created for you on CauseTrail${siteList ? ` with access to: <strong>${siteList}</strong>` : ''}.</p><p>Set your password to get started:</p><p><a href="${setPasswordUrl}">${setPasswordUrl}</a></p><p>This link expires in 7 days. If it expires, use "Forgot password?" on the login page to get a new one.</p>`
+			});
+		} catch (err) {
+			console.error('Failed to send invite email:', err);
+			return fail(500, {
+				form: 'addUser',
+				error: 'User was created, but the invite email failed to send. Ask them to use "Forgot password?" to set their password.',
+				name,
+				email
+			});
+		}
 
 		return { form: 'addUser', success: true };
+	},
+
+	updateSiteAccess: async ({ request, locals }) => {
+		if (locals.user?.role !== 'admin') return fail(403, { form: 'updateSiteAccess', error: 'Not authorized.' });
+
+		const data = await request.formData();
+		const userId = Number(data.get('userId'));
+		const siteIds = data
+			.getAll('siteIds')
+			.map((v) => Number(v))
+			.filter((n) => Number.isInteger(n));
+
+		if (!Number.isInteger(userId)) {
+			return fail(400, { form: 'updateSiteAccess', error: 'Invalid request.' });
+		}
+
+		await db.delete(siteUsers).where(eq(siteUsers.userId, userId));
+		if (siteIds.length > 0) {
+			await db.insert(siteUsers).values(siteIds.map((siteId) => ({ siteId, userId })));
+		}
+
+		return { form: 'updateSiteAccess', success: true, userId };
 	},
 
 	changePassword: async (event) => {
@@ -83,7 +167,7 @@ export const actions: Actions = {
 		}
 
 		const [user] = await db.select().from(users).where(eq(users.id, locals.user.id));
-		const valid = user && (await verifyPasswordHash(user.passwordHash, currentPassword));
+		const valid = user?.passwordHash && (await verifyPasswordHash(user.passwordHash, currentPassword));
 
 		if (!valid) {
 			recordAttempt(rateLimitKey);
@@ -105,7 +189,7 @@ export const actions: Actions = {
 	},
 
 	resetPassword: async ({ request, locals }) => {
-		if (!locals.user) return fail(401, { form: 'resetPassword', error: 'Not signed in.' });
+		if (locals.user?.role !== 'admin') return fail(403, { form: 'resetPassword', error: 'Not authorized.' });
 
 		const data = await request.formData();
 		const userId = Number(data.get('userId'));
@@ -131,7 +215,7 @@ export const actions: Actions = {
 	},
 
 	removeUser: async ({ request, locals }) => {
-		if (!locals.user) return fail(401, { form: 'removeUser', error: 'Not signed in.' });
+		if (locals.user?.role !== 'admin') return fail(403, { form: 'removeUser', error: 'Not authorized.' });
 
 		const data = await request.formData();
 		const userId = Number(data.get('userId'));

@@ -20,7 +20,7 @@
 
 			<div class="flex items-center gap-3">
 				<a href="/settings" class="text-sm text-white/60 transition hover:text-white">Settings</a>
-				<span class="hidden text-sm text-white/60 sm:inline">{data.user?.email}</span>
+				<span class="hidden text-sm text-white/60 sm:inline">{data.user?.name || data.user?.email}</span>
 				<form method="POST" action="/logout">
 					<button
 						type="submit"
