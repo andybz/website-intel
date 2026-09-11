@@ -76,6 +76,14 @@
 - Store tab shows: Products Published / Orders (7d) / Revenue (7d) big-number stats, a "Most Recent Order" callout, and a Recent Orders list - order statuses get friendly labels + color badges (`src/lib/utils/commerce.ts`); revenue only counts `processing`/`completed` orders (standard WooCommerce "paid" convention), computed at read time from the stored order rows, not a separately-maintained running total
 - Overview page gets a smaller version of the same widget, linking to the full Store tab
 
+**Self-hosted plugin auto-updates (2026-09-11):** the WordPress plugin previously had to be manually re-zipped and re-uploaded to every connected site for every change. Since this plugin is private (a connector to one specific paid service, not something wordpress.org's directory is meant for - see below), it now checks our own server for updates instead of wordpress.org.
+- Vendored the open-source ["Plugin Update Checker"](https://github.com/YahnisElsts/plugin-update-checker) library (MIT, v5.7) into `wordpress-plugin/andybz-monitor-connector/vendor/` - it hooks into WordPress's native Dashboard → Updates / "Update available" UI, just pointed at a URL we control instead of the WordPress.org API
+- `scripts/build-plugin-package.ts` runs as part of `npm run build` (every deploy): zips the current `wordpress-plugin/andybz-monitor-connector/` directory and writes a JSON manifest (name/version/download_url, parsed from the plugin's own `Version:` header) into `static/downloads/`, so both are served as plain static files at `https://monitor.andybz.com/downloads/andybz-monitor-connector.{zip,json}` - no new runtime server code, no auth needed (the plugin is useless without a real pairing key regardless of who can download its source)
+- The plugin itself just calls `PucFactory::buildUpdateChecker(...)` pointed at that JSON URL during `plugins_loaded`, independent of connection/pairing status
+- The connect page's pairing instructions (`PairingInstructions.svelte`) now link directly to the zip for first-time installs too, so onboarding a new site no longer requires manually building/finding a zip either
+- **One remaining manual step, unavoidable:** every already-connected site still needs ONE final manual re-upload of the plugin (to v0.8.0+) to gain the auto-updater itself - a plugin can't retroactively grant itself update-checking capability. Every version after that updates natively through wp-admin.
+- Deliberately NOT submitted to the public wordpress.org Plugin Directory: that requires a manual review process, GPL-compatible public listing, a support presence, and (per their guidelines) the plugin generally can't exist primarily as a connector to one specific paid private service - which is exactly what this is.
+
 **Not started:** Phase 4 (server-level monitoring), Phase 5 (SaaS/agency features).
 
 ### Backlog — large items deferred for later review

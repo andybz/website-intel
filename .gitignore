@@ -147,6 +147,9 @@ vite.config.ts.timestamp-*
 # WordPress plugin build artifact
 wordpress-plugin/*.zip
 
+# Generated at build time by scripts/build-plugin-package.ts
+/static/downloads/
+
 # SvelteKit adapter-node build output
 /build
 .DS_Store

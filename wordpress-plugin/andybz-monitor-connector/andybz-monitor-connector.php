@@ -2,7 +2,7 @@
 /**
  * Plugin Name: AndyBZ Monitor Connector
  * Description: Securely connects this WordPress website to the AndyBZ Website Monitor platform.
- * Version: 0.7.0
+ * Version: 0.8.0
  * Requires PHP: 7.4
  * Author: Andy
  * License: GPL-2.0-or-later
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'ANDYBZ_MONITOR_VERSION', '0.7.0' );
+define( 'ANDYBZ_MONITOR_VERSION', '0.8.0' );
 define( 'ANDYBZ_MONITOR_OPTION', 'andybz_monitor_connector' );
 define( 'ANDYBZ_MONITOR_DEFAULT_APP_URL', 'https://monitor.andybz.com' );
 define( 'ANDYBZ_MONITOR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -27,6 +27,7 @@ require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-error-re
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-change-tracker.php';
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-traffic.php';
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-admin.php';
+require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'vendor/plugin-update-checker/plugin-update-checker.php';
 
 add_action( 'plugins_loaded', array( 'AndyBZ_Monitor_Connector', 'instance' ) );
 add_action( 'plugins_loaded', array( 'AndyBZ_Monitor_Heartbeat', 'instance' ) );
@@ -34,6 +35,26 @@ add_action( 'plugins_loaded', array( 'AndyBZ_Monitor_Error_Reporter', 'instance'
 add_action( 'plugins_loaded', array( 'AndyBZ_Monitor_Change_Tracker', 'instance' ) );
 add_action( 'plugins_loaded', array( 'AndyBZ_Monitor_Traffic', 'instance' ) );
 add_action( 'plugins_loaded', array( 'AndyBZ_Monitor_Admin', 'instance' ) );
+
+// Self-hosted update checking (README: this plugin is private, not on
+// wordpress.org) - checks our own server for a JSON manifest instead. Works
+// regardless of pairing status, so it must not be gated behind is_connected().
+add_action(
+	'plugins_loaded',
+	function () {
+		if ( ! class_exists( 'YahnisElsts\PluginUpdateChecker\v5\PucFactory' ) ) {
+			return;
+		}
+
+		$app_url = AndyBZ_Monitor_Connector::instance()->get_settings()['app_url'];
+
+		YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+			untrailingslashit( $app_url ) . '/downloads/andybz-monitor-connector.json',
+			__FILE__,
+			'andybz-monitor-connector'
+		);
+	}
+);
 
 register_activation_hook( __FILE__, array( 'AndyBZ_Monitor_Heartbeat', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'AndyBZ_Monitor_Heartbeat', 'deactivate' ) );

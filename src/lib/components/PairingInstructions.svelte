@@ -7,7 +7,11 @@
 	<p class="mt-1 text-sm text-neutral-500">Follow these steps to connect your WordPress website.</p>
 
 	<ol class="mt-6 flex flex-col gap-3 text-sm text-neutral-700">
-		<li>1. Install the Monitor Connector plugin.</li>
+		<li>
+			1. <a href="/downloads/andybz-monitor-connector.zip" class="font-medium text-blue-700 hover:underline"
+				>Download</a
+			> and install the Monitor Connector plugin.
+		</li>
 		<li>2. Open Settings &rarr; Monitor Connector.</li>
 		<li>3. Paste this connection key:</li>
 	</ol>
