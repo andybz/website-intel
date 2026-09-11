@@ -56,7 +56,7 @@
 		<div class="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
 			<p class="text-sm font-medium text-amber-800">Waiting for connection</p>
 			<p class="mt-1 text-sm text-amber-700">
-				This website hasn't connected yet. Install the Monitor Connector plugin and enter the
+				This website hasn't connected yet. Install the CauseTrail plugin and enter the
 				pairing key to get started.
 			</p>
 			{#if data.user?.role === 'admin'}

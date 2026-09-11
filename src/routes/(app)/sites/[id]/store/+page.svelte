@@ -17,7 +17,7 @@
 	<div class="rounded-xl border border-dashed border-neutral-300 bg-white px-6 py-16 text-center">
 		<h2 class="text-base font-medium text-neutral-900">No store detected</h2>
 		<p class="mt-1 text-sm text-neutral-500">
-			Once WooCommerce is active on this website and the Monitor Connector plugin (v0.7.0+) reports
+			Once WooCommerce is active on this website and the CauseTrail plugin (v0.7.0+) reports
 			in, store data will appear here.
 		</p>
 	</div>

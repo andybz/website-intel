@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Monitor Connector admin page.
+ * Settings → CauseTrail admin page.
  *
  * @package AndyBZ_Monitor_Connector
  */
@@ -32,10 +32,10 @@ class AndyBZ_Monitor_Admin {
 
 	public function register_menu() {
 		add_options_page(
-			__( 'Monitor Connector', 'andybz-monitor-connector' ),
-			__( 'Monitor Connector', 'andybz-monitor-connector' ),
+			__( 'CauseTrail', 'causetrail-monitor' ),
+			__( 'CauseTrail', 'causetrail-monitor' ),
 			'manage_options',
-			'andybz-monitor-connector',
+			'causetrail-monitor',
 			array( $this, 'render_page' )
 		);
 	}
@@ -50,7 +50,7 @@ class AndyBZ_Monitor_Admin {
 		$connected = $connector->is_connected();
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Monitor Connector', 'andybz-monitor-connector' ); ?></h1>
+			<h1><?php esc_html_e( 'CauseTrail', 'causetrail-monitor' ); ?></h1>
 
 			<?php if ( isset( $_GET['andybz_monitor_error'] ) ) : ?>
 				<div class="notice notice-error">
@@ -60,27 +60,27 @@ class AndyBZ_Monitor_Admin {
 
 			<?php if ( isset( $_GET['andybz_monitor_connected'] ) ) : ?>
 				<div class="notice notice-success">
-					<p><?php esc_html_e( 'Connected successfully.', 'andybz-monitor-connector' ); ?></p>
+					<p><?php esc_html_e( 'Connected successfully.', 'causetrail-monitor' ); ?></p>
 				</div>
 			<?php endif; ?>
 
 			<?php if ( isset( $_GET['andybz_monitor_heartbeat_sent'] ) ) : ?>
 				<div class="notice notice-success">
-					<p><?php esc_html_e( 'Heartbeat sent successfully.', 'andybz-monitor-connector' ); ?></p>
+					<p><?php esc_html_e( 'Heartbeat sent successfully.', 'causetrail-monitor' ); ?></p>
 				</div>
 			<?php endif; ?>
 
 			<?php if ( $connected ) : ?>
 				<p>
-					<strong style="color:#1a7f37;">&#10003; <?php esc_html_e( 'Connected', 'andybz-monitor-connector' ); ?></strong>
+					<strong style="color:#1a7f37;">&#10003; <?php esc_html_e( 'Connected', 'causetrail-monitor' ); ?></strong>
 				</p>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Monitoring application', 'andybz-monitor-connector' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Monitoring application', 'causetrail-monitor' ); ?></th>
 						<td><?php echo esc_html( $settings['app_url'] ); ?></td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Site ID', 'andybz-monitor-connector' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Site ID', 'causetrail-monitor' ); ?></th>
 						<td><code><?php echo esc_html( $settings['site_id'] ); ?></code></td>
 					</tr>
 				</table>
@@ -88,17 +88,17 @@ class AndyBZ_Monitor_Admin {
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline-block;margin-right:8px;">
 					<?php wp_nonce_field( 'andybz_monitor_test_heartbeat' ); ?>
 					<input type="hidden" name="action" value="andybz_monitor_test_heartbeat" />
-					<?php submit_button( __( 'Send Heartbeat Now', 'andybz-monitor-connector' ), 'secondary', 'submit', false ); ?>
+					<?php submit_button( __( 'Send Heartbeat Now', 'causetrail-monitor' ), 'secondary', 'submit', false ); ?>
 				</form>
 
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline-block;">
 					<?php wp_nonce_field( 'andybz_monitor_disconnect' ); ?>
 					<input type="hidden" name="action" value="andybz_monitor_disconnect" />
-					<?php submit_button( __( 'Disconnect', 'andybz-monitor-connector' ), 'delete', 'submit', false ); ?>
+					<?php submit_button( __( 'Disconnect', 'causetrail-monitor' ), 'delete', 'submit', false ); ?>
 				</form>
 			<?php else : ?>
 				<p>
-					<?php esc_html_e( 'Paste the connection key shown in your Website Monitor dashboard to connect this website.', 'andybz-monitor-connector' ); ?>
+					<?php esc_html_e( 'Paste the connection key shown in your CauseTrail dashboard to connect this website.', 'causetrail-monitor' ); ?>
 				</p>
 
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -107,7 +107,7 @@ class AndyBZ_Monitor_Admin {
 					<table class="form-table" role="presentation">
 						<tr>
 							<th scope="row">
-								<label for="andybz_monitor_app_url"><?php esc_html_e( 'Monitoring application URL', 'andybz-monitor-connector' ); ?></label>
+								<label for="andybz_monitor_app_url"><?php esc_html_e( 'Monitoring application URL', 'causetrail-monitor' ); ?></label>
 							</th>
 							<td>
 								<input
@@ -122,7 +122,7 @@ class AndyBZ_Monitor_Admin {
 						</tr>
 						<tr>
 							<th scope="row">
-								<label for="andybz_monitor_pairing_token"><?php esc_html_e( 'Connection key', 'andybz-monitor-connector' ); ?></label>
+								<label for="andybz_monitor_pairing_token"><?php esc_html_e( 'Connection key', 'causetrail-monitor' ); ?></label>
 							</th>
 							<td>
 								<input
@@ -137,7 +137,7 @@ class AndyBZ_Monitor_Admin {
 							</td>
 						</tr>
 					</table>
-					<?php submit_button( __( 'Connect', 'andybz-monitor-connector' ) ); ?>
+					<?php submit_button( __( 'Connect', 'causetrail-monitor' ) ); ?>
 				</form>
 			<?php endif; ?>
 		</div>
@@ -146,7 +146,7 @@ class AndyBZ_Monitor_Admin {
 
 	public function handle_connect() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to do this.', 'andybz-monitor-connector' ) );
+			wp_die( esc_html__( 'You do not have permission to do this.', 'causetrail-monitor' ) );
 		}
 
 		check_admin_referer( 'andybz_monitor_connect' );
@@ -156,7 +156,7 @@ class AndyBZ_Monitor_Admin {
 
 		$result = AndyBZ_Monitor_Connector::instance()->connect( $app_url, $pairing_token );
 
-		$redirect_url = admin_url( 'options-general.php?page=andybz-monitor-connector' );
+		$redirect_url = admin_url( 'options-general.php?page=causetrail-monitor' );
 
 		if ( is_wp_error( $result ) ) {
 			$redirect_url = add_query_arg( 'andybz_monitor_error', rawurlencode( $result->get_error_message() ), $redirect_url );
@@ -170,27 +170,27 @@ class AndyBZ_Monitor_Admin {
 
 	public function handle_disconnect() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to do this.', 'andybz-monitor-connector' ) );
+			wp_die( esc_html__( 'You do not have permission to do this.', 'causetrail-monitor' ) );
 		}
 
 		check_admin_referer( 'andybz_monitor_disconnect' );
 
 		AndyBZ_Monitor_Connector::instance()->disconnect();
 
-		wp_safe_redirect( admin_url( 'options-general.php?page=andybz-monitor-connector' ) );
+		wp_safe_redirect( admin_url( 'options-general.php?page=causetrail-monitor' ) );
 		exit;
 	}
 
 	public function handle_test_heartbeat() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to do this.', 'andybz-monitor-connector' ) );
+			wp_die( esc_html__( 'You do not have permission to do this.', 'causetrail-monitor' ) );
 		}
 
 		check_admin_referer( 'andybz_monitor_test_heartbeat' );
 
 		$result = AndyBZ_Monitor_Heartbeat::instance()->send_heartbeat();
 
-		$redirect_url = admin_url( 'options-general.php?page=andybz-monitor-connector' );
+		$redirect_url = admin_url( 'options-general.php?page=causetrail-monitor' );
 
 		if ( is_wp_error( $result ) ) {
 			$redirect_url = add_query_arg( 'andybz_monitor_error', rawurlencode( $result->get_error_message() ), $redirect_url );

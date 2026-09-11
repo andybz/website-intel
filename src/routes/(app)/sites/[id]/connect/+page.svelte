@@ -15,7 +15,7 @@
 	<div class="rounded-xl border border-neutral-200 bg-white p-6">
 		<h2 class="text-base font-medium text-neutral-900">Generate a new connection key</h2>
 		<p class="mt-1 text-sm text-neutral-500">
-			Generate a pairing key to install and connect the Monitor Connector plugin on this website.
+			Generate a pairing key to install and connect the CauseTrail plugin on this website.
 		</p>
 		<form method="POST" class="mt-4">
 			<button type="submit" class="btn-primary">

@@ -46,7 +46,7 @@ class AndyBZ_Monitor_Heartbeat {
 	public function register_cron_interval( $schedules ) {
 		$schedules[ self::CRON_INTERVAL ] = array(
 			'interval' => 5 * MINUTE_IN_SECONDS,
-			'display'  => __( 'Every 5 minutes (AndyBZ Monitor)', 'andybz-monitor-connector' ),
+			'display'  => __( 'Every 5 minutes (CauseTrail)', 'causetrail-monitor' ),
 		);
 		return $schedules;
 	}
@@ -203,7 +203,7 @@ class AndyBZ_Monitor_Heartbeat {
 		$connector = AndyBZ_Monitor_Connector::instance();
 
 		if ( ! $connector->is_connected() ) {
-			return new WP_Error( 'andybz_monitor_not_connected', __( 'This website is not connected yet.', 'andybz-monitor-connector' ) );
+			return new WP_Error( 'andybz_monitor_not_connected', __( 'This website is not connected yet.', 'causetrail-monitor' ) );
 		}
 
 		$settings = $connector->get_settings();
@@ -236,7 +236,7 @@ class AndyBZ_Monitor_Heartbeat {
 			$body    = json_decode( wp_remote_retrieve_body( $response ), true );
 			$message = ( is_array( $body ) && ! empty( $body['message'] ) )
 				? $body['message']
-				: __( 'The monitoring application rejected the heartbeat.', 'andybz-monitor-connector' );
+				: __( 'The monitoring application rejected the heartbeat.', 'causetrail-monitor' );
 
 			return new WP_Error( 'andybz_monitor_heartbeat_failed', $message );
 		}

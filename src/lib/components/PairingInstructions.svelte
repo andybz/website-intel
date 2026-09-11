@@ -8,11 +8,11 @@
 
 	<ol class="mt-6 flex flex-col gap-3 text-sm text-neutral-700">
 		<li>
-			1. <a href="/downloads/andybz-monitor-connector.zip" class="font-medium text-blue-700 hover:underline"
+			1. <a href="/downloads/causetrail-monitor.zip" class="font-medium text-blue-700 hover:underline"
 				>Download</a
-			> and install the Monitor Connector plugin.
+			> and install the CauseTrail plugin.
 		</li>
-		<li>2. Open Settings &rarr; Monitor Connector.</li>
+		<li>2. Open Settings &rarr; CauseTrail.</li>
 		<li>3. Paste this connection key:</li>
 	</ol>
 

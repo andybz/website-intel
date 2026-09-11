@@ -24,7 +24,7 @@ class AndyBZ_Monitor_Event_Client {
 		$connector = AndyBZ_Monitor_Connector::instance();
 
 		if ( ! $connector->is_connected() ) {
-			return new WP_Error( 'andybz_monitor_not_connected', __( 'This website is not connected yet.', 'andybz-monitor-connector' ) );
+			return new WP_Error( 'andybz_monitor_not_connected', __( 'This website is not connected yet.', 'causetrail-monitor' ) );
 		}
 
 		$settings = $connector->get_settings();

@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { ZipArchive } from 'archiver';
 
 const APP_URL = 'https://monitor.andybz.com';
-const PLUGIN_SLUG = 'andybz-monitor-connector';
+const PLUGIN_SLUG = 'causetrail-monitor';
 const ROOT = join(import.meta.dirname, '..');
 const PLUGIN_DIR = join(ROOT, 'wordpress-plugin', PLUGIN_SLUG);
 const OUTPUT_DIR = join(ROOT, 'static', 'downloads');
@@ -42,7 +42,7 @@ async function buildZip(version: string): Promise<void> {
 
 function writeManifest(version: string): void {
 	const manifest = {
-		name: 'AndyBZ Monitor Connector',
+		name: 'CauseTrail',
 		version,
 		download_url: `${APP_URL}/downloads/${PLUGIN_SLUG}.zip`,
 		requires: '5.8',

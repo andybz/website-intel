@@ -17,7 +17,7 @@
 	<div class="rounded-xl border border-dashed border-neutral-300 bg-white px-6 py-16 text-center">
 		<h2 class="text-base font-medium text-neutral-900">No traffic data yet</h2>
 		<p class="mt-1 text-sm text-neutral-500">
-			Once the Monitor Connector plugin (v0.4.0+) reports page views, a human vs. bot breakdown will
+			Once the CauseTrail plugin (v0.4.0+) reports page views, a human vs. bot breakdown will
 			appear here.
 		</p>
 	</div>

@@ -69,14 +69,14 @@ class AndyBZ_Monitor_Connector {
 		if ( '' === $app_url || ! wp_http_validate_url( $app_url ) ) {
 			return new WP_Error(
 				'andybz_monitor_invalid_url',
-				__( 'Enter a valid monitoring application URL.', 'andybz-monitor-connector' )
+				__( 'Enter a valid monitoring application URL.', 'causetrail-monitor' )
 			);
 		}
 
 		if ( '' === $pairing_token ) {
 			return new WP_Error(
 				'andybz_monitor_missing_token',
-				__( 'Enter the connection key.', 'andybz-monitor-connector' )
+				__( 'Enter the connection key.', 'causetrail-monitor' )
 			);
 		}
 
@@ -99,7 +99,7 @@ class AndyBZ_Monitor_Connector {
 		if ( 200 !== $code ) {
 			$message = ( is_array( $body ) && ! empty( $body['message'] ) )
 				? $body['message']
-				: __( 'Unable to connect. Please check the key and try again.', 'andybz-monitor-connector' );
+				: __( 'Unable to connect. Please check the key and try again.', 'causetrail-monitor' );
 
 			return new WP_Error( 'andybz_monitor_connect_failed', $message );
 		}
@@ -107,7 +107,7 @@ class AndyBZ_Monitor_Connector {
 		if ( empty( $body['siteId'] ) || empty( $body['secret'] ) ) {
 			return new WP_Error(
 				'andybz_monitor_bad_response',
-				__( 'Unexpected response from the monitoring application.', 'andybz-monitor-connector' )
+				__( 'Unexpected response from the monitoring application.', 'causetrail-monitor' )
 			);
 		}
 

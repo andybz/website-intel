@@ -69,7 +69,10 @@ const PLUGIN_DESCRIPTIONS: Record<string, string> = {
 	'gdpr-cookie-consent': 'Shows a cookie consent banner to comply with privacy laws.',
 	'loco-translate': 'Lets you translate the text used by your theme and plugins.',
 	'manageWP-worker': 'Allows your site to be managed remotely from a central dashboard.',
-	'andybz-monitor-connector': 'Reports your site\u2019s health and activity to CauseTrail.'
+	// Both slugs map to our own connector plugin - 'andybz-monitor-connector'
+	// is the old folder name, kept until every already-connected site updates.
+	'andybz-monitor-connector': 'Reports your site\u2019s health and activity to CauseTrail.',
+	'causetrail-monitor': 'Reports your site\u2019s health and activity to CauseTrail.'
 };
 
 export function getPluginDescription(slug: string): string | null {

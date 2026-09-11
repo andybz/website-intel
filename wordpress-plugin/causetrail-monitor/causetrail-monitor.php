@@ -1,12 +1,13 @@
 <?php
 /**
- * Plugin Name: AndyBZ Monitor Connector
- * Description: Securely connects this WordPress website to the AndyBZ Website Monitor platform.
- * Version: 0.8.0
+ * Plugin Name: CauseTrail
+ * Description: Securely connects this WordPress website to your CauseTrail monitoring dashboard.
+ * Version: 0.9.0
  * Requires PHP: 7.4
- * Author: Andy
+ * Author: AndyBZ Creative
+ * Author URI: https://andybz.com
  * License: GPL-2.0-or-later
- * Text Domain: andybz-monitor-connector
+ * Text Domain: causetrail-monitor
  *
  * @package AndyBZ_Monitor_Connector
  */
@@ -15,7 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'ANDYBZ_MONITOR_VERSION', '0.8.0' );
+define( 'ANDYBZ_MONITOR_VERSION', '0.9.0' );
+// Unchanged on purpose across the causetrail-monitor rename - this is the
+// wp_options key already stored on every connected site, so keeping the old
+// value here preserves each site's existing pairing/connection state.
 define( 'ANDYBZ_MONITOR_OPTION', 'andybz_monitor_connector' );
 define( 'ANDYBZ_MONITOR_DEFAULT_APP_URL', 'https://monitor.andybz.com' );
 define( 'ANDYBZ_MONITOR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -49,9 +53,9 @@ add_action(
 		$app_url = AndyBZ_Monitor_Connector::instance()->get_settings()['app_url'];
 
 		YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
-			untrailingslashit( $app_url ) . '/downloads/andybz-monitor-connector.json',
+			untrailingslashit( $app_url ) . '/downloads/causetrail-monitor.json',
 			__FILE__,
-			'andybz-monitor-connector'
+			'causetrail-monitor'
 		);
 	}
 );
