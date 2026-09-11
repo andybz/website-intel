@@ -82,9 +82,13 @@ class AndyBZ_Monitor_Heartbeat {
 	/**
 	 * Gather safe, non-sensitive site metadata to report.
 	 *
+	 * @param bool $include_performance Whether to also run the (comparatively
+	 *                                  slow) page-speed check - only for
+	 *                                  blocking cron/manual heartbeats, never
+	 *                                  the opportunistic per-request one.
 	 * @return array
 	 */
-	public function collect_site_data() {
+	public function collect_site_data( $include_performance = false ) {
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
@@ -110,6 +114,7 @@ class AndyBZ_Monitor_Heartbeat {
 			'isMultisite'      => is_multisite(),
 			'plugins'          => $plugins,
 			'commerce'         => $this->collect_commerce_data(),
+			'performance'      => $include_performance ? AndyBZ_Monitor_Performance::instance()->maybe_check() : null,
 		);
 	}
 
@@ -218,7 +223,7 @@ class AndyBZ_Monitor_Heartbeat {
 					'Content-Type'  => 'application/json',
 					'Authorization' => 'Bearer ' . $settings['secret'],
 				),
-				'body'      => wp_json_encode( $this->collect_site_data() ),
+				'body'      => wp_json_encode( $this->collect_site_data( $blocking ) ),
 			)
 		);
 

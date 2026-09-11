@@ -12,6 +12,7 @@
 			{ label: 'Issues', href: `/sites/${data.site.id}/issues` },
 			{ label: 'Activity', href: `/sites/${data.site.id}/activity` },
 			{ label: 'Traffic', href: `/sites/${data.site.id}/traffic` },
+			{ label: 'Performance', href: `/sites/${data.site.id}/performance` },
 			data.site.ecommercePlatform ? { label: 'Store', href: `/sites/${data.site.id}/store` } : null,
 			{ label: 'WordPress', href: `/sites/${data.site.id}/wordpress` }
 		].filter((tab) => tab !== null)

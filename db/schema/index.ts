@@ -10,3 +10,4 @@ export * from './password-reset-tokens';
 export * from './issue-hourly-counts';
 export * from './pageview-hourly-counts';
 export * from './commerce-orders';
+export * from './performance-checks';

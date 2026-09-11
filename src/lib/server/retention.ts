@@ -6,7 +6,8 @@ import {
 	sessions,
 	pairingTokens,
 	passwordResetTokens,
-	commerceOrders
+	commerceOrders,
+	performanceChecks
 } from '$db/schema';
 
 // README section 54: hourly aggregates should only be kept for ~1 year, and
@@ -19,7 +20,7 @@ export async function pruneOldData() {
 	const now = new Date();
 	const oneYearAgo = new Date(now.getTime() - HOURLY_RETENTION_MS);
 
-	const [droppedIssueHours, droppedPageviewHours, droppedSessions, droppedPairingTokens, droppedResetTokens, droppedOrders] =
+	const [droppedIssueHours, droppedPageviewHours, droppedSessions, droppedPairingTokens, droppedResetTokens, droppedOrders, droppedPerformanceChecks] =
 		await Promise.all([
 			db.delete(issueHourlyCounts).where(lt(issueHourlyCounts.hourStart, oneYearAgo)).returning({ id: issueHourlyCounts.id }),
 			db
@@ -31,7 +32,8 @@ export async function pruneOldData() {
 			db.delete(sessions).where(lt(sessions.expiresAt, now)).returning({ id: sessions.id }),
 			db.delete(pairingTokens).where(lt(pairingTokens.expiresAt, now)).returning({ id: pairingTokens.id }),
 			db.delete(passwordResetTokens).where(lt(passwordResetTokens.expiresAt, now)).returning({ id: passwordResetTokens.id }),
-			db.delete(commerceOrders).where(lt(commerceOrders.placedAt, oneYearAgo)).returning({ id: commerceOrders.id })
+			db.delete(commerceOrders).where(lt(commerceOrders.placedAt, oneYearAgo)).returning({ id: commerceOrders.id }),
+			db.delete(performanceChecks).where(lt(performanceChecks.checkedAt, oneYearAgo)).returning({ id: performanceChecks.id })
 		]);
 
 	return {
@@ -40,7 +42,8 @@ export async function pruneOldData() {
 		sessions: droppedSessions.length,
 		pairingTokens: droppedPairingTokens.length,
 		passwordResetTokens: droppedResetTokens.length,
-		commerceOrders: droppedOrders.length
+		commerceOrders: droppedOrders.length,
+		performanceChecks: droppedPerformanceChecks.length
 	};
 }
 

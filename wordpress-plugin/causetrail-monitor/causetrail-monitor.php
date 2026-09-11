@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CauseTrail
  * Description: Securely connects this WordPress website to your CauseTrail monitoring dashboard.
- * Version: 0.9.1
+ * Version: 0.10.0
  * Requires PHP: 7.4
  * Author: AndyBZ Creative
  * Author URI: https://andybz.com
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'ANDYBZ_MONITOR_VERSION', '0.9.1' );
+define( 'ANDYBZ_MONITOR_VERSION', '0.10.0' );
 // Unchanged on purpose across the causetrail-monitor rename - this is the
 // wp_options key already stored on every connected site, so keeping the old
 // value here preserves each site's existing pairing/connection state.
@@ -31,6 +31,7 @@ require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-event-cl
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-error-reporter.php';
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-change-tracker.php';
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-traffic.php';
+require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-performance.php';
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-admin.php';
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'vendor/plugin-update-checker/plugin-update-checker.php';
 

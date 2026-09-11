@@ -3,7 +3,7 @@ import { json, error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { sites, sitePlugins, commerceOrders } from '$db/schema';
+import { sites, sitePlugins, commerceOrders, performanceChecks } from '$db/schema';
 import { verifyApiSecret } from '$lib/server/site-auth';
 import { maybeRunRetentionCleanup } from '$lib/server/retention';
 
@@ -35,6 +35,23 @@ const commerceSchema = z
 	})
 	.nullable();
 
+// Assets found on the homepage during a synthetic loopback load check - not
+// real user/browser telemetry, just enough to spot "what's the biggest file
+// weighing this page down" (see the WP plugin's performance checker).
+const performanceAssetSchema = z.object({
+	url: z.string().trim().min(1).max(2000),
+	type: z.string().trim().min(1).max(20),
+	sizeBytes: z.number().int().min(0).max(500_000_000)
+});
+
+const performanceSchema = z
+	.object({
+		loadTimeMs: z.number().int().min(0).max(600_000),
+		pageSizeBytes: z.number().int().min(0).max(500_000_000).optional(),
+		assets: z.array(performanceAssetSchema).max(30).optional()
+	})
+	.nullable();
+
 const heartbeatSchema = z.object({
 	wordpressVersion: z.string().trim().max(50).optional(),
 	phpVersion: z.string().trim().max(50).optional(),
@@ -43,7 +60,8 @@ const heartbeatSchema = z.object({
 	themeVersion: z.string().trim().max(50).optional(),
 	isMultisite: z.boolean().optional(),
 	plugins: z.array(pluginSchema).max(1000).optional(),
-	commerce: commerceSchema.optional()
+	commerce: commerceSchema.optional(),
+	performance: performanceSchema.optional()
 });
 
 function getBearerToken(request: Request): string | null {
@@ -143,6 +161,16 @@ export const POST: RequestHandler = async ({ request, params }) => {
 					}
 				});
 		}
+	}
+
+	if (data.performance) {
+		await db.insert(performanceChecks).values({
+			siteId: site.id,
+			loadTimeMs: data.performance.loadTimeMs,
+			pageSizeBytes: data.performance.pageSizeBytes ?? null,
+			assets: data.performance.assets ?? null,
+			checkedAt: now
+		});
 	}
 
 	void maybeRunRetentionCleanup();
