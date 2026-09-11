@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CauseTrail
  * Description: Securely connects this WordPress website to your CauseTrail monitoring dashboard.
- * Version: 0.9.0
+ * Version: 0.9.1
  * Requires PHP: 7.4
  * Author: AndyBZ Creative
  * Author URI: https://andybz.com
@@ -16,13 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'ANDYBZ_MONITOR_VERSION', '0.9.0' );
+define( 'ANDYBZ_MONITOR_VERSION', '0.9.1' );
 // Unchanged on purpose across the causetrail-monitor rename - this is the
 // wp_options key already stored on every connected site, so keeping the old
 // value here preserves each site's existing pairing/connection state.
 define( 'ANDYBZ_MONITOR_OPTION', 'andybz_monitor_connector' );
 define( 'ANDYBZ_MONITOR_DEFAULT_APP_URL', 'https://monitor.andybz.com' );
 define( 'ANDYBZ_MONITOR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'ANDYBZ_MONITOR_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-connector.php';
 require_once ANDYBZ_MONITOR_PLUGIN_DIR . 'includes/class-andybz-monitor-heartbeat.php';
@@ -61,4 +62,5 @@ add_action(
 );
 
 register_activation_hook( __FILE__, array( 'AndyBZ_Monitor_Heartbeat', 'activate' ) );
+register_activation_hook( __FILE__, array( 'AndyBZ_Monitor_Admin', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'AndyBZ_Monitor_Heartbeat', 'deactivate' ) );

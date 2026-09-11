@@ -28,6 +28,52 @@ class AndyBZ_Monitor_Admin {
 		add_action( 'admin_post_andybz_monitor_connect', array( $this, 'handle_connect' ) );
 		add_action( 'admin_post_andybz_monitor_disconnect', array( $this, 'handle_disconnect' ) );
 		add_action( 'admin_post_andybz_monitor_test_heartbeat', array( $this, 'handle_test_heartbeat' ) );
+		add_action( 'admin_init', array( $this, 'maybe_redirect_after_activation' ) );
+		add_filter( 'plugin_action_links_' . ANDYBZ_MONITOR_PLUGIN_BASENAME, array( $this, 'add_settings_link' ) );
+	}
+
+	/**
+	 * Flags a redirect-to-settings on the next admin page load after activation.
+	 */
+	public static function activate() {
+		set_transient( 'andybz_monitor_activation_redirect', true, 30 );
+	}
+
+	/**
+	 * Sends the admin to the settings page right after activating the plugin.
+	 * Skipped for bulk activations, since redirecting would only work for one plugin.
+	 */
+	public function maybe_redirect_after_activation() {
+		if ( ! get_transient( 'andybz_monitor_activation_redirect' ) ) {
+			return;
+		}
+
+		delete_transient( 'andybz_monitor_activation_redirect' );
+
+		if ( wp_doing_ajax() || isset( $_GET['activate-multi'] ) ) {
+			return;
+		}
+
+		wp_safe_redirect( admin_url( 'options-general.php?page=causetrail-monitor' ) );
+		exit;
+	}
+
+	/**
+	 * Adds a "Settings" link next to Activate/Deactivate on the Plugins list.
+	 *
+	 * @param array $links Existing action links.
+	 * @return array
+	 */
+	public function add_settings_link( $links ) {
+		$settings_link = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( admin_url( 'options-general.php?page=causetrail-monitor' ) ),
+			esc_html__( 'Settings', 'causetrail-monitor' )
+		);
+
+		array_unshift( $links, $settings_link );
+
+		return $links;
 	}
 
 	public function register_menu() {
@@ -51,6 +97,17 @@ class AndyBZ_Monitor_Admin {
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'CauseTrail', 'causetrail-monitor' ); ?></h1>
+
+			<p>
+				<a
+					href="<?php echo esc_url( $settings['app_url'] ); ?>"
+					class="button button-secondary"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					<?php esc_html_e( 'View CauseTrail Dashboard', 'causetrail-monitor' ); ?> &#8599;
+				</a>
+			</p>
 
 			<?php if ( isset( $_GET['andybz_monitor_error'] ) ) : ?>
 				<div class="notice notice-error">
@@ -97,9 +154,15 @@ class AndyBZ_Monitor_Admin {
 					<?php submit_button( __( 'Disconnect', 'causetrail-monitor' ), 'delete', 'submit', false ); ?>
 				</form>
 			<?php else : ?>
-				<p>
-					<?php esc_html_e( 'Paste the connection key shown in your CauseTrail dashboard to connect this website.', 'causetrail-monitor' ); ?>
-				</p>
+				<div class="notice notice-info" style="padding:12px 16px;">
+					<p><strong><?php esc_html_e( 'How to get a connection key:', 'causetrail-monitor' ); ?></strong></p>
+					<ol style="margin-left:1.2em;list-style:decimal;">
+						<li><?php esc_html_e( 'Log in to your CauseTrail dashboard.', 'causetrail-monitor' ); ?></li>
+						<li><?php esc_html_e( 'Open this website (or add it, if it is not listed yet).', 'causetrail-monitor' ); ?></li>
+						<li><?php esc_html_e( 'Go to the Connect tab and click "Generate Connection Key".', 'causetrail-monitor' ); ?></li>
+						<li><?php esc_html_e( 'Copy the key it shows you and paste it below.', 'causetrail-monitor' ); ?></li>
+					</ol>
+				</div>
 
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<?php wp_nonce_field( 'andybz_monitor_connect' ); ?>
