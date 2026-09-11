@@ -6,7 +6,7 @@
 		size = 'md'
 	}: {
 		label: string;
-		value: number;
+		value: number | string;
 		tone?: 'green' | 'yellow' | 'orange' | 'red' | 'neutral';
 		size?: 'md' | 'lg';
 	} = $props();

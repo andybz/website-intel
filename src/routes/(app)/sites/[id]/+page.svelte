@@ -5,6 +5,7 @@
 	import EventTypeBadge from '$lib/components/EventTypeBadge.svelte';
 	import StatCard from '$lib/components/StatCard.svelte';
 	import HealthRing from '$lib/components/HealthRing.svelte';
+	import { getOrderStatusLabel, getOrderStatusColor, formatCurrency } from '$lib/utils/commerce';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -189,6 +190,45 @@
 				<span class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-neutral-300"></span> Bot</span>
 			</div>
 		</div>
+
+		{#if data.commerce}
+			<div class="rounded-xl border border-neutral-200 bg-white p-6">
+				<div class="flex items-center justify-between">
+					<h2 class="text-base font-medium text-neutral-900">Store</h2>
+					<a href="/sites/{data.site.id}/store" class="text-sm text-neutral-500 hover:text-neutral-700">
+						View store &rarr;
+					</a>
+				</div>
+				<div class="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3">
+					<StatCard label="Products" value={data.site.productCount ?? 0} tone="neutral" />
+					<StatCard label="Orders (7d)" value={data.commerce.ordersLast7Days} tone="green" />
+					<StatCard
+						label="Revenue (7d)"
+						value={formatCurrency(data.commerce.revenueLast7Days, data.site.storeCurrency)}
+						tone="green"
+					/>
+				</div>
+				{#if data.commerce.mostRecentOrder}
+					{@const order = data.commerce.mostRecentOrder}
+					<div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-neutral-50 px-4 py-3 text-sm">
+						<div>
+							<span class="font-medium text-neutral-900">
+								Order {order.orderNumber ?? `#${order.externalOrderId}`}
+							</span>
+							<span class="ml-2 text-neutral-500">{formatRelativeTime(order.placedAt)}</span>
+						</div>
+						<div class="flex items-center gap-2">
+							<span class="font-medium text-neutral-900">
+								{formatCurrency(Number.parseFloat(order.total) || 0, order.currency)}
+							</span>
+							<span class="rounded-full px-2.5 py-0.5 text-xs font-medium {getOrderStatusColor(order.status)}">
+								{getOrderStatusLabel(order.status)}
+							</span>
+						</div>
+					</div>
+				{/if}
+			</div>
+		{/if}
 
 		<div class="rounded-xl border border-neutral-200 bg-white p-6">
 			<h2 class="text-base font-medium text-neutral-900">Ask about this website</h2>

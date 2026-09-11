@@ -2,12 +2,13 @@ import { desc, eq, and, gte, gt, ne } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { issues, activity, pageviewHourlyCounts, sites } from '$db/schema';
+import { issues, activity, pageviewHourlyCounts, sites, commerceOrders } from '$db/schema';
 import { computeCurrentSeverity } from '$lib/server/severity';
 import { computeSiteHealth } from '$lib/server/health';
 import { answerWebsiteQuestion } from '$lib/server/ask';
 import { isRateLimited, recordAttempt } from '$lib/server/auth';
 import { canAccessSite } from '$lib/server/access';
+import { REVENUE_STATUSES } from '$lib/utils/commerce';
 
 const TRAFFIC_WINDOW_MS = 1000 * 60 * 60 * 24;
 const TREND_DAYS = 7;
@@ -93,9 +94,41 @@ export const load: PageServerLoad = async ({ parent }) => {
 		health,
 		traffic,
 		trafficTrend,
-		criticalCount: openIssues.filter((issue) => issue.currentSeverity >= 8).length
+		criticalCount: openIssues.filter((issue) => issue.currentSeverity >= 8).length,
+		...(site.ecommercePlatform ? await loadCommerceSummary(site.id) : { commerce: null })
 	};
 };
+
+const COMMERCE_WINDOW_MS = 1000 * 60 * 60 * 24 * 7;
+
+async function loadCommerceSummary(siteId: number) {
+	const since = new Date(Date.now() - COMMERCE_WINDOW_MS);
+
+	const [mostRecentOrder, last7DaysOrders] = await Promise.all([
+		db
+			.select()
+			.from(commerceOrders)
+			.where(eq(commerceOrders.siteId, siteId))
+			.orderBy(desc(commerceOrders.placedAt))
+			.limit(1),
+		db
+			.select()
+			.from(commerceOrders)
+			.where(and(eq(commerceOrders.siteId, siteId), gte(commerceOrders.placedAt, since)))
+	]);
+
+	const revenueLast7Days = last7DaysOrders
+		.filter((o) => REVENUE_STATUSES.includes(o.status))
+		.reduce((sum, o) => sum + (Number.parseFloat(o.total) || 0), 0);
+
+	return {
+		commerce: {
+			mostRecentOrder: mostRecentOrder[0] ?? null,
+			ordersLast7Days: last7DaysOrders.length,
+			revenueLast7Days
+		}
+	};
+}
 
 const ASK_WINDOW_MS = 1000 * 60 * 60 * 24 * 7;
 

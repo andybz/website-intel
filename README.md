@@ -70,6 +70,12 @@
 - Activity tab now color-codes entries by category (teal = plugin/theme/core change, blue = account activity, purple = content change) using the existing `EventTypeBadge`-style dot + friendly labels (`src/lib/utils/event-labels.ts`)
 - Issues no longer appear on the Activity tab at all - that's what the Issues tab is for
 
+**WooCommerce store data (2026-09-11):** a new "Store" tab (auto-hidden unless WooCommerce is detected) plus a compact widget on the Overview page.
+- Plugin v0.7.0 reports a basic store snapshot on every heartbeat when `class_exists('WooCommerce')`: published product count, store currency, and the 15 most recent orders (order number, status, total, item count, date) - deliberately excludes ALL customer PII (no name/email/address)
+- `sites` gained `ecommerce_platform`/`product_count`/`store_currency` (nulled out again if WooCommerce is later deactivated); new `commerce_orders` table holds the rolling recent-orders window, upserted by `(site_id, external_order_id)` so status changes (processing → completed → refunded) update in place rather than duplicating, pruned after 1 year via the existing opportunistic retention job
+- Store tab shows: Products Published / Orders (7d) / Revenue (7d) big-number stats, a "Most Recent Order" callout, and a Recent Orders list - order statuses get friendly labels + color badges (`src/lib/utils/commerce.ts`); revenue only counts `processing`/`completed` orders (standard WooCommerce "paid" convention), computed at read time from the stored order rows, not a separately-maintained running total
+- Overview page gets a smaller version of the same widget, linking to the full Store tab
+
 **Not started:** Phase 4 (server-level monitoring), Phase 5 (SaaS/agency features).
 
 ### Backlog — large items deferred for later review

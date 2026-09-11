@@ -6,13 +6,16 @@
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
-	const tabs = $derived([
-		{ label: 'Overview', href: `/sites/${data.site.id}` },
-		{ label: 'Issues', href: `/sites/${data.site.id}/issues` },
-		{ label: 'Activity', href: `/sites/${data.site.id}/activity` },
-		{ label: 'Traffic', href: `/sites/${data.site.id}/traffic` },
-		{ label: 'WordPress', href: `/sites/${data.site.id}/wordpress` }
-	]);
+	const tabs = $derived(
+		[
+			{ label: 'Overview', href: `/sites/${data.site.id}` },
+			{ label: 'Issues', href: `/sites/${data.site.id}/issues` },
+			{ label: 'Activity', href: `/sites/${data.site.id}/activity` },
+			{ label: 'Traffic', href: `/sites/${data.site.id}/traffic` },
+			data.site.ecommercePlatform ? { label: 'Store', href: `/sites/${data.site.id}/store` } : null,
+			{ label: 'WordPress', href: `/sites/${data.site.id}/wordpress` }
+		].filter((tab) => tab !== null)
+	);
 </script>
 
 <div class="flex flex-col gap-6">

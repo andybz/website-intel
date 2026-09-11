@@ -1,4 +1,4 @@
-import { pgTable, serial, uuid, text, boolean, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, uuid, text, boolean, integer, timestamp, pgEnum } from 'drizzle-orm/pg-core';
 
 // Lifecycle of a site's connection to the monitoring platform.
 export const siteStatus = pgEnum('site_status', ['pending', 'connected', 'disconnected']);
@@ -17,6 +17,11 @@ export const sites = pgTable('sites', {
 	activeTheme: text('active_theme'),
 	themeVersion: text('theme_version'),
 	isMultisite: boolean('is_multisite').notNull().default(false),
+	// E-commerce snapshot (currently WooCommerce only) - null when not detected.
+	// See src/routes/(app)/sites/[id]/store/ and commerce_orders for order detail.
+	ecommercePlatform: text('ecommerce_platform'),
+	productCount: integer('product_count'),
+	storeCurrency: text('store_currency'),
 	connectedAt: timestamp('connected_at', { withTimezone: true }),
 	lastHeartbeatAt: timestamp('last_heartbeat_at', { withTimezone: true }),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

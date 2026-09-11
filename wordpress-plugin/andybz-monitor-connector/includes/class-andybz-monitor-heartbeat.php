@@ -1,6 +1,7 @@
 <?php
 /**
- * Collects site metadata and sends periodic heartbeats to the monitoring app.
+ * Collects site metadata (and, if WooCommerce is active, a basic store
+ * snapshot) and sends periodic heartbeats to the monitoring app.
  *
  * @package AndyBZ_Monitor_Connector
  */
@@ -108,6 +109,57 @@ class AndyBZ_Monitor_Heartbeat {
 			'themeVersion'     => $theme->get( 'Version' ),
 			'isMultisite'      => is_multisite(),
 			'plugins'          => $plugins,
+			'commerce'         => $this->collect_commerce_data(),
+		);
+	}
+
+	/**
+	 * Basic WooCommerce snapshot (product count + recent orders) - null on
+	 * sites without WooCommerce active. Deliberately excludes customer PII
+	 * (name/email/address) - just enough to answer "when was the last order,
+	 * what was it, how's the store trending".
+	 *
+	 * @return array|null
+	 */
+	private function collect_commerce_data() {
+		if ( ! class_exists( 'WooCommerce' ) || ! function_exists( 'wc_get_orders' ) ) {
+			return null;
+		}
+
+		$counts        = wp_count_posts( 'product' );
+		$product_count = isset( $counts->publish ) ? (int) $counts->publish : 0;
+
+		$recent_orders = array();
+		$orders        = wc_get_orders(
+			array(
+				'limit'   => 15,
+				'orderby' => 'date',
+				'order'   => 'DESC',
+				'type'    => 'shop_order',
+			)
+		);
+
+		foreach ( $orders as $order ) {
+			if ( ! $order instanceof WC_Order ) {
+				continue;
+			}
+			$date            = $order->get_date_created();
+			$recent_orders[] = array(
+				'orderId'     => $order->get_id(),
+				'orderNumber' => $order->get_order_number(),
+				'status'      => $order->get_status(),
+				'total'       => (string) $order->get_total(),
+				'currency'    => $order->get_currency(),
+				'itemCount'   => $order->get_item_count(),
+				'placedAt'    => $date ? $date->date( 'c' ) : null,
+			);
+		}
+
+		return array(
+			'platform'     => 'woocommerce',
+			'productCount' => $product_count,
+			'currency'     => get_woocommerce_currency(),
+			'recentOrders' => $recent_orders,
 		);
 	}
 
