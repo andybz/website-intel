@@ -86,6 +86,15 @@
 
 **Plugin rebrand (2026-09-11):** folder renamed `wordpress-plugin/andybz-monitor-connector/` → `wordpress-plugin/causetrail-monitor/` (main file renamed to match: `causetrail-monitor.php`), plugin header changed to Name "CauseTrail" / Description with no mention of "AndyBZ Monitor" / Author "AndyBZ Creative" (linking to andybz.com), version 0.9.0. The PUC slug, update-manifest filenames, and download links across the app were all updated to `causetrail-monitor` to match. Deliberately did NOT rename: internal PHP class names (`AndyBZ_Monitor_*`), file names under `includes/`, or - critically - the `wp_options` key (`andybz_monitor_connector`, still underscored, unchanged) that stores each site's existing pairing/connection state; renaming that would silently disconnect every already-paired site and force re-pairing, which is a much bigger disruption than the one remaining manual reinstall this rename already requires.
 
+**Plugin settings UX (2026-09-11, v0.9.1):** Plugins list now shows a "Settings" action link; activating the plugin redirects straight to its settings page (skipped for bulk activation); the disconnected-state settings page explains how to generate a connection key from the dashboard; a "View CauseTrail Dashboard" button links out to the configured app URL.
+
+**Performance tab (2026-09-11, plugin v0.10.0):** new site tab showing homepage load time trends and the bulkiest asset files, plus the app's first Chart.js-based visual charts.
+- New `performance_checks` table (load time ms, page size bytes, an `assets` jsonb array of `{url, type, sizeBytes}`) - one row per check, pruned after 1 year like the other time-series tables
+- WP plugin: new `AndyBZ_Monitor_Performance` class does a loopback `wp_remote_get` of the homepage to time the response, then regex-scans the HTML for up to 10 linked CSS/JS/image URLs and `wp_remote_head`s each for its `Content-Length`. Throttled to once per hour via a stored option timestamp, and deliberately only ever runs on the blocking cron/manual heartbeat path (`send_heartbeat_request( $blocking )` - performance only collected when `$blocking` is true), never the opportunistic per-visitor heartbeat, so it can never add latency to a real page load
+- Heartbeat endpoint accepts an optional `performance` object and inserts a check row when present; omitted (not explicitly `null`) whenever the plugin's own hourly throttle skips a cycle
+- Performance tab (always visible, graceful empty state like Traffic/Activity): stat cards for latest load time / a Good-Needs Improvement-Slow rating (TTFB-style thresholds) / page size, a Chart.js line chart of the load-time trend, a Chart.js horizontal bar chart of the bulkiest assets, and a full list of everything the last check measured
+- Added `chart.js` as a dependency plus a small reusable `ChartCanvas.svelte` wrapper (`src/lib/components/ChartCanvas.svelte`) intended for future charts elsewhere in the app, not just this tab
+
 **Not started:** Phase 4 (server-level monitoring), Phase 5 (SaaS/agency features).
 
 ### Backlog — large items deferred for later review
