@@ -64,6 +64,12 @@
 - Admin's "Add a user" flow now takes Name + Email + Role (+ site checklist for clients) instead of a typed password — reuses the existing password-reset-token + Resend email infrastructure to send a "set your password" invite link (7-day expiry; falls back to the normal "Forgot password?" flow if it lapses)
 - Settings page's Users list lets an admin change any client's site access at any time via a per-user checklist, independent of the invite step
 
+**Activity tab redesign (2026-09-11):** the Activity tab previously merged the `activity` table with the grouped `issues` table into one feed, so it felt like a duplicate of the Issues tab. Now it's real site activity only:
+- New event types (plugin v0.6.0), all routed to the discrete `activity` timeline (never grouped/deduped like errors): `user_login` (successful logins, with role + IP), `user_registered`, `user_deleted`, `user_role_changed` (skips the initial role assignment during registration itself), `content_published`/`content_updated`/`content_unpublished`/`content_trashed`/`content_deleted` (posts/pages only, skips revisions/autosaves — `content_updated` specifically only fires for edits to already-published content, since creation/status changes are reported separately)
+- New `account`/`content` categories added alongside the existing `change`/`error`/`security` ones (`src/routes/api/sites/[uuid]/events/+server.ts`) — both route to the activity timeline, not the issues pipeline
+- Activity tab now color-codes entries by category (teal = plugin/theme/core change, blue = account activity, purple = content change) using the existing `EventTypeBadge`-style dot + friendly labels (`src/lib/utils/event-labels.ts`)
+- Issues no longer appear on the Activity tab at all - that's what the Issues tab is for
+
 **Not started:** Phase 4 (server-level monitoring), Phase 5 (SaaS/agency features).
 
 ### Backlog — large items deferred for later review

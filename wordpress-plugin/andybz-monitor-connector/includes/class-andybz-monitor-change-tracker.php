@@ -1,7 +1,9 @@
 <?php
 /**
- * Tracks WordPress changes (plugin/theme/core updates), failed logins, and
- * 404s, reporting them as monitoring events.
+ * Tracks WordPress changes (plugin/theme/core updates), account activity
+ * (logins, user create/delete/role changes), content changes (post/page
+ * publish/update/trash/delete), failed logins, and 404s, reporting them as
+ * monitoring events.
  *
  * @package AndyBZ_Monitor_Connector
  */
@@ -19,6 +21,9 @@ class AndyBZ_Monitor_Change_Tracker {
 
 	/** Minimum time between reported failed-login events, to survive brute-force floods. */
 	const LOGIN_THROTTLE_SECONDS = 10;
+
+	/** Post types worth reporting content changes for - skip custom post types/attachments. */
+	const TRACKED_POST_TYPES = array( 'post', 'page' );
 
 	public static function instance() {
 		if ( null === self::$instance ) {
@@ -41,6 +46,15 @@ class AndyBZ_Monitor_Change_Tracker {
 		add_action( 'upgrader_process_complete', array( $this, 'on_upgrader_complete' ), 10, 2 );
 		add_action( 'wp_login_failed', array( $this, 'on_login_failed' ) );
 		add_action( 'template_redirect', array( $this, 'on_template_redirect' ) );
+
+		add_action( 'wp_login', array( $this, 'on_login' ), 10, 2 );
+		add_action( 'user_register', array( $this, 'on_user_registered' ) );
+		add_action( 'deleted_user', array( $this, 'on_user_deleted' ), 10, 3 );
+		add_action( 'set_user_role', array( $this, 'on_user_role_changed' ), 10, 3 );
+
+		add_action( 'transition_post_status', array( $this, 'on_post_status_transition' ), 10, 3 );
+		add_action( 'post_updated', array( $this, 'on_post_updated' ), 10, 3 );
+		add_action( 'before_delete_post', array( $this, 'on_post_deleted' ) );
 	}
 
 	public function on_plugin_activated( $plugin ) {
@@ -126,6 +140,183 @@ class AndyBZ_Monitor_Change_Tracker {
 					'username'  => mb_substr( sanitize_text_field( $username ), 0, 190 ),
 					'ipAddress' => AndyBZ_Monitor_Event_Client::current_client_ip(),
 				),
+			)
+		);
+	}
+
+	/**
+	 * @param string  $user_login
+	 * @param WP_User $user
+	 */
+	public function on_login( $user_login, $user ) {
+		$role = ! empty( $user->roles ) ? $user->roles[0] : 'subscriber';
+
+		AndyBZ_Monitor_Event_Client::send(
+			array(
+				'eventType' => 'user_login',
+				'category'  => 'account',
+				'message'   => sprintf( '%s logged in', $user_login ),
+				'metadata'  => array(
+					'username'  => sanitize_text_field( $user_login ),
+					'role'      => $role,
+					'ipAddress' => AndyBZ_Monitor_Event_Client::current_client_ip(),
+				),
+			)
+		);
+	}
+
+	public function on_user_registered( $user_id ) {
+		$user = get_userdata( $user_id );
+		if ( ! $user ) {
+			return;
+		}
+		$role = ! empty( $user->roles ) ? $user->roles[0] : 'subscriber';
+
+		AndyBZ_Monitor_Event_Client::send(
+			array(
+				'eventType' => 'user_registered',
+				'category'  => 'account',
+				'message'   => sprintf( 'New user account created: %s (%s)', $user->user_login, $role ),
+				'metadata'  => array(
+					'username' => $user->user_login,
+					'role'     => $role,
+				),
+			)
+		);
+	}
+
+	/**
+	 * @param int          $id
+	 * @param int|null     $reassign
+	 * @param WP_User|null $user The now-deleted user, if still available.
+	 */
+	public function on_user_deleted( $id, $reassign, $user ) {
+		$username = $user && ! empty( $user->user_login ) ? $user->user_login : "user #{$id}";
+
+		AndyBZ_Monitor_Event_Client::send(
+			array(
+				'eventType' => 'user_deleted',
+				'category'  => 'account',
+				'message'   => sprintf( 'User account removed: %s', $username ),
+			)
+		);
+	}
+
+	/**
+	 * @param int    $user_id
+	 * @param string $role     The new role.
+	 * @param array  $old_roles Roles the user had before this change.
+	 */
+	public function on_user_role_changed( $user_id, $role, $old_roles ) {
+		// Empty $old_roles means this is the initial role assignment during
+		// registration (set_user_role also fires then), not a later change.
+		if ( empty( $old_roles ) || in_array( $role, $old_roles, true ) ) {
+			return;
+		}
+
+		$user     = get_userdata( $user_id );
+		$username = $user ? $user->user_login : "user #{$user_id}";
+
+		AndyBZ_Monitor_Event_Client::send(
+			array(
+				'eventType' => 'user_role_changed',
+				'category'  => 'account',
+				'message'   => sprintf( "%s's role changed to %s", $username, $role ),
+				'metadata'  => array(
+					'username'      => $username,
+					'newRole'       => $role,
+					'previousRoles' => array_values( $old_roles ),
+				),
+			)
+		);
+	}
+
+	/**
+	 * @param string  $new_status
+	 * @param string  $old_status
+	 * @param WP_Post $post
+	 */
+	public function on_post_status_transition( $new_status, $old_status, $post ) {
+		if ( $new_status === $old_status || ! in_array( $post->post_type, self::TRACKED_POST_TYPES, true ) ) {
+			return;
+		}
+		if ( wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) ) {
+			return;
+		}
+
+		$label = 'page' === $post->post_type ? 'Page' : 'Post';
+		$title = $post->post_title ? $post->post_title : '(no title)';
+
+		if ( 'publish' === $new_status ) {
+			$event_type = 'content_published';
+			$message    = sprintf( '%s published: %s', $label, $title );
+		} elseif ( 'publish' === $old_status && 'trash' !== $new_status ) {
+			$event_type = 'content_unpublished';
+			$message    = sprintf( '%s unpublished: %s', $label, $title );
+		} elseif ( 'trash' === $new_status ) {
+			$event_type = 'content_trashed';
+			$message    = sprintf( '%s moved to trash: %s', $label, $title );
+		} else {
+			// e.g. auto-draft -> draft - not worth reporting.
+			return;
+		}
+
+		AndyBZ_Monitor_Event_Client::send(
+			array(
+				'eventType' => $event_type,
+				'category'  => 'content',
+				'message'   => $message,
+			)
+		);
+	}
+
+	/**
+	 * Edits to already-published content. Creation/publish/unpublish/trash
+	 * are all reported via on_post_status_transition() instead, so this only
+	 * fires for a real edit to content that was already live.
+	 *
+	 * @param int     $post_id
+	 * @param WP_Post $post_after
+	 * @param WP_Post $post_before
+	 */
+	public function on_post_updated( $post_id, $post_after, $post_before ) {
+		if ( ! in_array( $post_after->post_type, self::TRACKED_POST_TYPES, true ) ) {
+			return;
+		}
+		if ( 'publish' !== $post_after->post_status || 'publish' !== $post_before->post_status ) {
+			return;
+		}
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+			return;
+		}
+
+		$label = 'page' === $post_after->post_type ? 'Page' : 'Post';
+
+		AndyBZ_Monitor_Event_Client::send(
+			array(
+				'eventType' => 'content_updated',
+				'category'  => 'content',
+				'message'   => sprintf( '%s updated: %s', $label, $post_after->post_title ? $post_after->post_title : '(no title)' ),
+			)
+		);
+	}
+
+	public function on_post_deleted( $post_id ) {
+		$post = get_post( $post_id );
+		if ( ! $post || ! in_array( $post->post_type, self::TRACKED_POST_TYPES, true ) ) {
+			return;
+		}
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+			return;
+		}
+
+		$label = 'page' === $post->post_type ? 'Page' : 'Post';
+
+		AndyBZ_Monitor_Event_Client::send(
+			array(
+				'eventType' => 'content_deleted',
+				'category'  => 'content',
+				'message'   => sprintf( '%s permanently deleted: %s', $label, $post->post_title ? $post->post_title : '(no title)' ),
 			)
 		);
 	}

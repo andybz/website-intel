@@ -14,7 +14,9 @@ import { maybeRunRetentionCleanup } from '$lib/server/retention';
 
 const eventSchema = z.object({
 	eventType: z.string().trim().min(1).max(50),
-	category: z.enum(['error', 'security', 'wordpress', 'change', 'performance', 'uptime', 'system']).optional(),
+	category: z
+		.enum(['error', 'security', 'wordpress', 'change', 'account', 'content', 'performance', 'uptime', 'system'])
+		.optional(),
 	message: z.string().trim().min(1).max(2000),
 	file: z.string().trim().max(500).optional(),
 	line: z.number().int().min(0).max(1_000_000).optional(),
@@ -40,8 +42,19 @@ const CHANGE_EVENT_TYPES = new Set([
 	'wordpress_updated'
 ]);
 
+const ACCOUNT_EVENT_TYPES = new Set(['user_login', 'user_registered', 'user_deleted', 'user_role_changed']);
+const CONTENT_EVENT_TYPES = new Set([
+	'content_published',
+	'content_updated',
+	'content_unpublished',
+	'content_trashed',
+	'content_deleted'
+]);
+
 function defaultCategory(eventType: string): string {
 	if (CHANGE_EVENT_TYPES.has(eventType)) return 'change';
+	if (ACCOUNT_EVENT_TYPES.has(eventType)) return 'account';
+	if (CONTENT_EVENT_TYPES.has(eventType)) return 'content';
 	if (eventType === 'failed_login' || eventType.startsWith('security_')) return 'security';
 	if (eventType.startsWith('php_') || eventType.startsWith('http_')) return 'error';
 	return 'system';
@@ -74,9 +87,10 @@ export const POST: RequestHandler = async ({ request, params }) => {
 	const category = data.category ?? defaultCategory(data.eventType);
 	const now = new Date();
 
-	// Discrete one-off facts (a plugin update, an activation, etc.) get their
-	// own timeline row - they should never be deduped/grouped like errors.
-	if (category === 'change') {
+	// Discrete one-off facts (a plugin update, an activation, a login, a
+	// published post, etc.) get their own timeline row - they should never be
+	// deduped/grouped like errors.
+	if (category === 'change' || category === 'account' || category === 'content') {
 		const [entry] = await db
 			.insert(activity)
 			.values({

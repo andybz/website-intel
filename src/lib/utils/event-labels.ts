@@ -6,7 +6,24 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
 	php_fatal: 'PHP Fatal Error',
 	http_404: '404 Not Found',
 	http_500: '500 Server Error',
-	failed_login: 'Failed Login'
+	failed_login: 'Failed Login',
+	plugin_updated: 'Plugin Updated',
+	plugin_activated: 'Plugin Activated',
+	plugin_deactivated: 'Plugin Deactivated',
+	plugin_installed: 'Plugin Installed',
+	plugin_deleted: 'Plugin Deleted',
+	theme_updated: 'Theme Updated',
+	theme_activated: 'Theme Activated',
+	wordpress_updated: 'WordPress Updated',
+	user_login: 'User Login',
+	user_registered: 'User Registered',
+	user_deleted: 'User Removed',
+	user_role_changed: 'Role Changed',
+	content_published: 'Published',
+	content_updated: 'Content Updated',
+	content_unpublished: 'Unpublished',
+	content_trashed: 'Moved to Trash',
+	content_deleted: 'Content Deleted'
 };
 
 export function getEventTypeLabel(eventType: string): string {
