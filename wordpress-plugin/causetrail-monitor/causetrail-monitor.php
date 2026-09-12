@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CauseTrail
  * Description: Securely connects this WordPress website to your CauseTrail monitoring dashboard.
- * Version: 0.10.0
+ * Version: 0.10.1
  * Requires PHP: 7.4
  * Author: AndyBZ Creative
  * Author URI: https://andybz.com
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'ANDYBZ_MONITOR_VERSION', '0.10.0' );
+define( 'ANDYBZ_MONITOR_VERSION', '0.10.1' );
 // Unchanged on purpose across the causetrail-monitor rename - this is the
 // wp_options key already stored on every connected site, so keeping the old
 // value here preserves each site's existing pairing/connection state.

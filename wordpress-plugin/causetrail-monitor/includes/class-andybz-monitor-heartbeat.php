@@ -20,6 +20,24 @@ class AndyBZ_Monitor_Heartbeat {
 	const OPPORTUNISTIC_THROTTLE_TRANSIENT = 'andybz_monitor_last_opportunistic_heartbeat';
 	const OPPORTUNISTIC_THROTTLE_SECONDS = 4 * MINUTE_IN_SECONDS;
 
+	// Performance checks were originally only ever collected from the
+	// CRON_HOOK-triggered heartbeat - on sites where WP-Cron never actually
+	// fires (DISABLE_WP_CRON with no real system cron, or just low traffic),
+	// that meant the Performance tab stayed empty forever even though basic
+	// heartbeats kept arriving via the opportunistic path below. This fires
+	// a non-blocking self-loopback on real requests instead, so it rides the
+	// same reliable trigger as the opportunistic heartbeat without adding
+	// latency to the visitor's own page load.
+	const ASYNC_PERFORMANCE_ACTION = 'andybz_monitor_run_performance_check';
+	const ASYNC_PERFORMANCE_THROTTLE_TRANSIENT = 'andybz_monitor_last_async_performance_trigger';
+	const ASYNC_PERFORMANCE_THROTTLE_SECONDS = 15 * MINUTE_IN_SECONDS;
+	// Separate, much shorter throttle applied inside the admin-ajax handler
+	// itself (not just the trigger above) - the endpoint is reachable by
+	// anyone (wp_ajax_nopriv), so this caps how often a full heartbeat can
+	// be forced regardless of who/what calls it directly.
+	const ASYNC_PERFORMANCE_ENDPOINT_THROTTLE_TRANSIENT = 'andybz_monitor_last_async_performance_run';
+	const ASYNC_PERFORMANCE_ENDPOINT_THROTTLE_SECONDS = MINUTE_IN_SECONDS;
+
 	/**
 	 * @var AndyBZ_Monitor_Heartbeat|null
 	 */
@@ -41,6 +59,9 @@ class AndyBZ_Monitor_Heartbeat {
 		// Fires on every real request (front-end or admin) regardless of
 		// WP-Cron's state, so low-traffic or DISABLE_WP_CRON sites still stay fresh.
 		add_action( 'init', array( $this, 'maybe_send_opportunistic_heartbeat' ) );
+		add_action( 'init', array( $this, 'maybe_trigger_async_performance_check' ) );
+		add_action( 'wp_ajax_' . self::ASYNC_PERFORMANCE_ACTION, array( $this, 'handle_async_performance_check' ) );
+		add_action( 'wp_ajax_nopriv_' . self::ASYNC_PERFORMANCE_ACTION, array( $this, 'handle_async_performance_check' ) );
 	}
 
 	public function register_cron_interval( $schedules ) {
@@ -196,6 +217,57 @@ class AndyBZ_Monitor_Heartbeat {
 		// can't all slip through before the first one finishes.
 		set_transient( self::OPPORTUNISTIC_THROTTLE_TRANSIENT, time(), self::OPPORTUNISTIC_THROTTLE_SECONDS );
 		$this->send_heartbeat_request( false );
+	}
+
+	/**
+	 * Fires a non-blocking loopback request to run a performance check out
+	 * of band, so it rides real site traffic instead of depending on
+	 * WP-Cron (which many hosts disable, throttle, or never trigger on a
+	 * low-traffic site). The loopback request itself returns almost
+	 * immediately regardless of how long the check inside it takes, since
+	 * 'blocking' => false means we never wait for or read its response.
+	 */
+	public function maybe_trigger_async_performance_check() {
+		$connector = AndyBZ_Monitor_Connector::instance();
+
+		if ( ! $connector->is_connected() ) {
+			return;
+		}
+
+		if ( false !== get_transient( self::ASYNC_PERFORMANCE_THROTTLE_TRANSIENT ) ) {
+			return;
+		}
+
+		set_transient( self::ASYNC_PERFORMANCE_THROTTLE_TRANSIENT, time(), self::ASYNC_PERFORMANCE_THROTTLE_SECONDS );
+
+		$url = add_query_arg( 'action', self::ASYNC_PERFORMANCE_ACTION, admin_url( 'admin-ajax.php' ) );
+		wp_remote_get(
+			$url,
+			array(
+				'timeout'   => 0.01,
+				'blocking'  => false,
+				'sslverify' => false,
+			)
+		);
+	}
+
+	/**
+	 * admin-ajax.php handler for the async trigger above - runs in its own
+	 * separate request, so it's safe for this to block/take a while.
+	 * AndyBZ_Monitor_Performance::maybe_check() re-applies its own hourly
+	 * throttle internally, so this is a no-op most of the time even if
+	 * triggered more often than that (e.g. concurrent visitors).
+	 */
+	public function handle_async_performance_check() {
+		if ( false !== get_transient( self::ASYNC_PERFORMANCE_ENDPOINT_THROTTLE_TRANSIENT ) ) {
+			wp_die();
+		}
+		set_transient( self::ASYNC_PERFORMANCE_ENDPOINT_THROTTLE_TRANSIENT, time(), self::ASYNC_PERFORMANCE_ENDPOINT_THROTTLE_SECONDS );
+
+		if ( AndyBZ_Monitor_Connector::instance()->is_connected() ) {
+			$this->send_heartbeat_request( true );
+		}
+		wp_die();
 	}
 
 	/**

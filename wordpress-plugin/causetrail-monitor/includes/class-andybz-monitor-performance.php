@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class AndyBZ_Monitor_Performance {
 
 	const LAST_CHECK_OPTION      = 'andybz_monitor_last_performance_check';
+	const LAST_ERROR_OPTION      = 'andybz_monitor_performance_last_error';
 	const CHECK_INTERVAL_SECONDS = HOUR_IN_SECONDS;
 	const MAX_ASSETS_TO_CHECK    = 10;
 
@@ -51,15 +52,43 @@ class AndyBZ_Monitor_Performance {
 	}
 
 	/**
+	 * The most recent failure reason, if the last check didn't succeed -
+	 * shown on the settings page so a permanently-failing host isn't a
+	 * silent, invisible gap in the Performance tab.
+	 *
+	 * @return string
+	 */
+	public function get_last_error() {
+		return (string) get_option( self::LAST_ERROR_OPTION, '' );
+	}
+
+	/**
 	 * @return array|null
 	 */
 	private function run_check() {
 		$start    = microtime( true );
 		$response = wp_remote_get( home_url( '/' ), array( 'timeout' => 20 ) );
 
+		// Some hosts fail loopback requests over a mismatched/self-signed
+		// certificate (a well-known WordPress "loopback request" issue) -
+		// retry once without SSL verification before giving up, same as the
+		// site's own homepage HTML is public content either way.
+		if ( is_wp_error( $response ) && false !== stripos( $response->get_error_message(), 'ssl' ) ) {
+			$response = wp_remote_get( home_url( '/' ), array( 'timeout' => 20, 'sslverify' => false ) );
+		}
+
 		if ( is_wp_error( $response ) ) {
+			update_option( self::LAST_ERROR_OPTION, $response->get_error_message(), false );
 			return null;
 		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( $code < 200 || $code >= 400 ) {
+			update_option( self::LAST_ERROR_OPTION, sprintf( 'Homepage returned HTTP %d.', $code ), false );
+			return null;
+		}
+
+		update_option( self::LAST_ERROR_OPTION, '', false );
 
 		$load_time_ms    = (int) round( ( microtime( true ) - $start ) * 1000 );
 		$body            = wp_remote_retrieve_body( $response );

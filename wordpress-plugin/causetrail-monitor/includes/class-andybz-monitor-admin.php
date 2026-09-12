@@ -142,6 +142,17 @@ class AndyBZ_Monitor_Admin {
 					</tr>
 				</table>
 
+				<?php $performance_error = AndyBZ_Monitor_Performance::instance()->get_last_error(); ?>
+				<?php if ( $performance_error ) : ?>
+					<div class="notice notice-warning inline">
+						<p>
+							<strong><?php esc_html_e( 'Performance check failing:', 'causetrail-monitor' ); ?></strong>
+							<?php echo esc_html( $performance_error ); ?>
+							<?php esc_html_e( 'The Performance tab on your dashboard may be missing recent data until this resolves.', 'causetrail-monitor' ); ?>
+						</p>
+					</div>
+				<?php endif; ?>
+
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline-block;margin-right:8px;">
 					<?php wp_nonce_field( 'andybz_monitor_test_heartbeat' ); ?>
 					<input type="hidden" name="action" value="andybz_monitor_test_heartbeat" />
